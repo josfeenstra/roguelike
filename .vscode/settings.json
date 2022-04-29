@@ -6,6 +6,7 @@
         ".vscode/**",
         "target/**/*",
         "**/*.rs",
+        "Cargo.lock",
     ],
     "emeraldwalk.runonsave": {
         "commands": [
