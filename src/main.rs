@@ -20,6 +20,7 @@ impl GameState for State {
         ctx.cls();
         print_menu(ctx);
     }
+
 }
 
 fn main() -> rltk::BError {
