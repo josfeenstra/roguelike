@@ -3,26 +3,22 @@ use rltk::{Rltk, GameState};
 const WIDTH: u32 = 50;
 const HEIGHT: u32 = 30;
 const HH: u32 = HEIGHT / 2;
-const HW: u32 = WIDTH / 2;
-
 
 struct State {}
 
-impl State {
-    fn print_menu(ctx : &mut Rltk) {
-        ctx.print(4, HH + 0, "Welcome, Dungeoneer!");
-        ctx.print(4, HH + 1, "--------------------");
-        ctx.print(4, HH + 3, "> Play");
-        ctx.print(4, HH + 4, "  Options");
-        ctx.print(4, HH + 5, "  Quit");
-    }
+fn print_menu(ctx : &mut Rltk) {
+    ctx.print(4, HH + 0, "Welcome, Dungeoneer!");
+    ctx.print(4, HH + 1, "--------------------");
+    ctx.print(4, HH + 3, "> Play");
+    ctx.print(4, HH + 4, "  Options");
+    ctx.print(4, HH + 5, "  Quit");
 }
 
 impl GameState for State {
 
     fn tick(&mut self, ctx : &mut Rltk) {
         ctx.cls();
-        State::print_menu(ctx);
+        print_menu(ctx);
     }
 }
 
