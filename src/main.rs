@@ -1,13 +1,15 @@
+use maze::Tile;
 use rltk::{GameState, Rltk, RGB, VirtualKeyCode};
 use specs::prelude::*;
 use std::{cmp::{max, min}, borrow::BorrowMut};
 use specs_derive::Component;
 
+mod maze;
+mod cons;
 
-const WIDTH: i32 = 50;
-const HEIGHT: i32 = 30;
-const HW: i32 = WIDTH / 2;
-const HH: i32 = HEIGHT / 2;
+use crate::maze::Map;
+
+
 
 ///////////////////////////////////////////////////////////
 
@@ -42,7 +44,7 @@ impl Renderable {
 
 ///////////////////////////////////////////////////////////
 
-#[derive(Component, Debug, Copy, Clone)]
+#[derive(Component, Debug, Copy, Clone, PartialEq)]
 enum Dir {
     Left,
     Right,
@@ -66,11 +68,16 @@ struct Player {
 impl Player {
     
     fn new() -> Self {
-        Self { dir: Dir::Left }
+        Self { dir: Dir::Right }
     }
 }
 
 fn try_move_player(dir: Dir, ecs: &mut World) {
+    
+    let mut positions = ecs.write_storage::<Position>();
+    let mut players = ecs.write_storage::<Player>();
+    let mut rends = ecs.write_storage::<Renderable>();
+    let map = ecs.fetch::<Map>();
 
     let char = match dir {
         Dir::Left  => '◄',
@@ -81,15 +88,23 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
 
     let (dx, dy) = dir_to_xy(dir);
 
-    let mut positions = ecs.write_storage::<Position>();
-    let mut players = ecs.write_storage::<Player>();
-    let mut rends = ecs.write_storage::<Renderable>();
+    
+
 
     for (player, pos, rends) in (&mut players, &mut positions, &mut rends).join() {
-        pos.x = min(WIDTH-1 , max(0, pos.x + dx));
-        pos.y = min(HEIGHT-1, max(0, pos.y + dy));
+
+        // fix dir
         player.dir = dir;
         rends.glyph = rltk::to_cp437(char);
+        
+        let (nx, ny) = (pos.x + dx, pos.y + dy);
+        
+        // bump into wall
+        if map.get(nx, ny) == Tile::Wall { continue };
+
+        // actually move (but not out of screen)
+        pos.x = min((cons::WIDTH - 1) as i32 , max(0, nx));
+        pos.y = min((cons::HEIGHT - 1) as i32, max(0, ny));
     }
 }
 
@@ -116,7 +131,7 @@ fn try_player_shoot(ecs: &mut World) {
         .with(Position::new(pos.x + dx, pos.y + dy))
         .with(Projectile {dir, lifetime: 10})
         .with(Renderable::new(
-            rltk::to_cp437('.'), 
+            rltk::to_cp437('o'), 
             RGB::named(rltk::GRAY), 
             RGB::named(rltk::BLACK)))
         .build();
@@ -147,6 +162,36 @@ fn player_input(gs: &mut State, ctx: &mut Rltk) {
     }
 }
 
+pub fn draw_map(map: &Map, ctx : &mut Rltk) {
+
+    let mut y = 0;
+    let mut x = 0;
+    for tile in map.data.iter() {
+        // Render a tile depending upon the tile type
+        match tile {
+            Tile::Floor => {
+                ctx.set(x, y, 
+                    RGB::from_u8(10, 10, 10), 
+                    RGB::from_u8(0, 0, 0), 
+                    rltk::to_cp437('.'));
+            }
+            Tile::Wall => {
+                ctx.set(x, y, 
+                    RGB::from_u8(0, 255, 0), 
+                    RGB::from_u8(0, 0, 0), 
+                    rltk::to_cp437('#'));
+            }
+        }
+
+        // Move the coordinates
+        x += 1;
+        if x > map.width - 1 {
+            x = 0;
+            y += 1;
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////
 
 struct State {
@@ -154,11 +199,12 @@ struct State {
 }
 
 fn print_menu(ctx : &mut Rltk) {
-    ctx.print(4, HH + 0, "Welcome, Dungeoneer!");
-    ctx.print(4, HH + 1, "|------------------|");
-    ctx.print(4, HH + 3, "> Play");
-    ctx.print(4, HH + 4, "  Options");
-    ctx.print(4, HH + 5, "  Quit");
+    ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
+    ctx.print(4, cons::HH + 1, "|------------------|");
+    ctx.print(4, cons::HH + 3, "> Play");
+    ctx.print(4, cons::HH + 4, "  Levels");
+    ctx.print(4, cons::HH + 5, "  Options");
+    ctx.print(4, cons::HH + 6, "  Quit");
 }
 
 impl GameState for State {
@@ -167,19 +213,29 @@ impl GameState for State {
         ctx.cls();
         player_input(self, ctx);
         moveProjectiles(self, ctx);
-        print_menu(ctx);
-        render(self, ctx);
+        self.render(ctx);
+    }
+}
+impl State {
+
+    fn render(&mut self, ctx : &mut Rltk) {
+        let positions = self.ecs.read_storage::<Position>();
+        let renderables = self.ecs.read_storage::<Renderable>();
+        let maze = self.ecs.fetch::<Map>();
+
+        draw_map(&maze, ctx);
+
+        for (pos, render) in (&positions, &renderables).join() {
+            ctx.set(pos.x, pos.y, render.foreground, render.background, render.glyph);
+        }
+    
+        for (pos, render) in (&positions, &renderables).join() {
+            ctx.set(pos.x, pos.y, render.foreground, render.background, render.glyph);
+        }
     }
 }
 
-fn render(state: &mut State, ctx : &mut Rltk) {
-    let positions = state.ecs.read_storage::<Position>();
-    let renderables = state.ecs.read_storage::<Renderable>();
 
-    for (pos, render) in (&positions, &renderables).join() {
-        ctx.set(pos.x, pos.y, render.foreground, render.background, render.glyph);
-    }
-}
 
 fn moveProjectiles(state: &mut State, ctx : &mut Rltk) {
 
@@ -259,8 +315,9 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
 
-    drawing_things(&mut gs.ecs);
+    // drawing_things(&mut gs.ecs);
 
+    // create the player
     gs.ecs
         .create_entity()
         .with(Position::new(20, 20))
@@ -271,8 +328,12 @@ fn main() -> rltk::BError {
         .with(Player::new())
         .build();
 
+    // render the world
+    let maze = Map::new_random(cons::WIDTH, cons::HEIGHT);
+    gs.ecs.insert(maze);
+
     use rltk::RltkBuilder;
-    let context = RltkBuilder::simple(WIDTH, HEIGHT).unwrap()
+    let context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT).unwrap()
         .with_title("Roguelike Tutorial")
         .build()?;
 
