@@ -100,7 +100,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         let (nx, ny) = (pos.x + dx, pos.y + dy);
         
         // bump into wall
-        if map.get(nx, ny) == Tile::Wall { continue };
+        if map.get(nx, ny) != Tile::Floor { continue };
 
         // actually move (but not out of screen)
         pos.x = min((cons::WIDTH - 1) as i32 , max(0, nx));
@@ -171,15 +171,21 @@ pub fn draw_map(map: &Map, ctx : &mut Rltk) {
         match tile {
             Tile::Floor => {
                 ctx.set(x, y, 
-                    RGB::from_u8(10, 10, 10), 
-                    RGB::from_u8(0, 0, 0), 
-                    rltk::to_cp437('.'));
+                    RGB::from_u8(8, 30, 60), 
+                    cons::RGB_BACKGROUND, 
+                    rltk::to_cp437('#')); // •
             }
             Tile::Wall => {
                 ctx.set(x, y, 
                     RGB::from_u8(0, 255, 0), 
-                    RGB::from_u8(0, 0, 0), 
+                    cons::RGB_BACKGROUND, 
                     rltk::to_cp437('#'));
+            }
+            Tile::Abyss => {
+                ctx.set(x, y, 
+                    RGB::from_u8(10, 10, 10), 
+                    RGB::from_u8(0, 0, 0), 
+                    rltk::to_cp437(' '));
             }
         }
 

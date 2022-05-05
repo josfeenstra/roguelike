@@ -4,6 +4,7 @@ use rltk::{RGB, Rltk};
 pub enum Tile {
     Wall,
     Floor,
+    Abyss,
 }
 
 
@@ -39,9 +40,15 @@ impl Map {
         let mut rng = rltk::RandomNumberGenerator::new();
 
         for _i in 0..100 as i32 {
-            let x = rng.roll_dice(1, w-1);
-            let y = rng.roll_dice(1, h-1);
+            let x = rng.roll_dice(1, w-2);
+            let y = rng.roll_dice(1, h-2);
             map.set(x, y, Tile::Wall);
+        }
+
+        for _i in 0..100 as i32 {
+            let x = rng.roll_dice(1, w-2);
+            let y = rng.roll_dice(1, h-2);
+            map.set(x, y, Tile::Abyss);
         }
 
         return map;
