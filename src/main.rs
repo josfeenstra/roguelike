@@ -1,62 +1,19 @@
-use maze::Tile;
+#![allow(dead_code)]
+
+use map::Tile;
 use rltk::{GameState, Rltk, RGB, VirtualKeyCode};
 use specs::prelude::*;
-use std::{cmp::{max, min}, borrow::BorrowMut};
 use specs_derive::Component;
+use std::{cmp::{max, min}};
 
-mod maze;
+mod map;
 mod cons;
+mod dir;
+mod components;
 
-use crate::maze::Map;
-
-
-
-///////////////////////////////////////////////////////////
-
-#[derive(Component)]
-struct Position {
-    x: i32,
-    y: i32,
-}
-
-impl Position {
-
-    fn new(x: i32, y: i32) -> Self {
-        Self {x, y}
-    }
-}
-
-///////////////////////////////////////////////////////////
-
-#[derive(Component)]
-struct Renderable {
-    glyph: rltk::FontCharType,
-    foreground: RGB,
-    background: RGB,
-}
-
-impl Renderable {
-    
-    fn new(glyph: rltk::FontCharType, foreground: RGB, background: RGB) -> Self {
-        Self {glyph, foreground, background}
-    }
-}
-
-///////////////////////////////////////////////////////////
-
-#[derive(Component, Debug, Copy, Clone, PartialEq)]
-enum Dir {
-    Left,
-    Right,
-    Up,
-    Down
-}
-
-#[derive(Component, Debug)]
-struct Projectile {
-    dir: Dir,
-    lifetime: i32,
-}
+use crate::map::*;
+use crate::dir::*;
+use crate::components::*;
 
 ///////////////////////////////////////////////////////////
 
@@ -87,9 +44,6 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
     };
 
     let (dx, dy) = dir_to_xy(dir);
-
-    
-
 
     for (player, pos, rends) in (&mut players, &mut positions, &mut rends).join() {
 
@@ -137,14 +91,7 @@ fn try_player_shoot(ecs: &mut World) {
         .build();
 }
 
-fn dir_to_xy(dir: Dir) -> (i32, i32) {
-    match dir {
-        Dir::Left => (-1, 0),
-        Dir::Right => (1, 0),
-        Dir::Up => (0, -1),
-        Dir::Down => (0, 1),
-    }
-}
+
 
 fn player_input(gs: &mut State, ctx: &mut Rltk) {
     
@@ -218,7 +165,7 @@ impl GameState for State {
     fn tick(&mut self, ctx : &mut Rltk) {
         ctx.cls();
         player_input(self, ctx);
-        moveProjectiles(self, ctx);
+        move_projectiles(self, ctx);
         self.render(ctx);
     }
 }
@@ -243,7 +190,7 @@ impl State {
 
 
 
-fn moveProjectiles(state: &mut State, ctx : &mut Rltk) {
+fn move_projectiles(state: &mut State, _ctx : &mut Rltk) {
 
     let mut positions = state.ecs.write_storage::<Position>();
     let mut projectiles = state.ecs.write_storage::<Projectile>();
@@ -335,7 +282,7 @@ fn main() -> rltk::BError {
         .build();
 
     // render the world
-    let maze = Map::new_random(cons::WIDTH, cons::HEIGHT);
+    let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 200, 100);
     gs.ecs.insert(maze);
 
     use rltk::RltkBuilder;

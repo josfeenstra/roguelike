@@ -19,10 +19,10 @@ impl Map {
     pub fn new(width: usize, height: usize) -> Self {
 
         let data = vec![Tile::Floor; width * height];
-        return Self {width, height, data};
+        Self {width, height, data}
     }
 
-    pub fn new_random(width: usize, height: usize) -> Self {
+    pub fn new_random(width: usize, height: usize, num_walls: u32, num_holes: u32) -> Self {
         let mut map = Map::new(width, height);
 
         let w = width as i32;
@@ -39,19 +39,19 @@ impl Map {
 
         let mut rng = rltk::RandomNumberGenerator::new();
 
-        for _i in 0..100 as i32 {
+        for _i in 0..num_walls as i32 {
             let x = rng.roll_dice(1, w-2);
             let y = rng.roll_dice(1, h-2);
             map.set(x, y, Tile::Wall);
         }
 
-        for _i in 0..100 as i32 {
+        for _i in 0..num_holes as i32 {
             let x = rng.roll_dice(1, w-2);
             let y = rng.roll_dice(1, h-2);
             map.set(x, y, Tile::Abyss);
         }
 
-        return map;
+        map
     }
 
     pub fn set(&mut self, x: i32, y: i32, value: Tile) -> usize {
