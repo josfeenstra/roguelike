@@ -1,6 +1,6 @@
 use specs::prelude::*;
 use specs_derive::Component;
-use rltk::RGB;
+use rltk::{RGB, Rltk};
 
 use crate::dir::Dir;
 
