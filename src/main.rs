@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
 use map::Tile;
-use rltk::{GameState, Rltk, RGB, VirtualKeyCode};
+use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
-use specs_derive::Component;
-use std::{cmp::{max, min}};
 
 mod map;
 mod cons;
