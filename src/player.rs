@@ -22,7 +22,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
     let mut rends = ecs.write_storage::<Renderable>();
-    let map = ecs.fetch::<Matrix<Tile>>();
+    let mut map = ecs.fetch_mut::<Matrix<Tile>>();
 
     let char = match dir {
         Dir::Left  => '◄',
@@ -41,8 +41,25 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         
         let (nx, ny) = (pos.x + dx, pos.y + dy);
         
-        // bump into wall
-        if map.get(nx, ny) != Tile::Floor { continue };
+        let nb = map.get(nx, ny).unwrap_or(Tile::Wall);
+        if nb != Tile::Floor { // bump into something?
+            
+            if nb == Tile::Wall { // bump into wall?
+                let afterwall = map.get(nx+dx, ny+dy).unwrap_or(Tile::Wall);
+                if afterwall == Tile::Wall { continue }
+                if afterwall == Tile::Floor { // after wall floor? push.
+                    map.set(nx, ny, Tile::Floor);
+                    map.set(nx+dx, ny+dy, Tile::Wall);
+                }
+                if afterwall == Tile::Abyss { // after wall abyss? push it in
+                    map.set(nx, ny, Tile::Floor);
+                    map.set(nx+dx, ny+dy, Tile::Floor);
+                }
+            } else { // bump into something else? dont go there
+                continue;
+            } 
+             
+        };
 
         // actually move (but not out of screen)
         pos.x = min((cons::WIDTH - 1) as i32 , max(0, nx));

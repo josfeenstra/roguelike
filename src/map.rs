@@ -18,8 +18,11 @@ impl<T: PartialEq + Clone + Copy> Matrix<T> {
         id
     }
 
-    pub fn get(&self, x: i32, y: i32) -> T {
-        self.data[self.to_index(x, y)]
+    pub fn get(&self, x: i32, y: i32) -> Option<T> {
+        if x < 0 || x >= self.width as i32 || y < 0 || y >= self.height as i32 {
+            return None
+        }
+        Some(self.data[self.to_index(x, y)])
     }
 
     pub fn to_index(&self, x: i32, y: i32) -> usize {
