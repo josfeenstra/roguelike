@@ -43,7 +43,6 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         
         let nb = map.get(nx, ny).unwrap_or(Tile::Wall);
         if nb != Tile::Floor { // bump into something?
-            
             if nb == Tile::Wall { // bump into wall?
                 let afterwall = map.get(nx+dx, ny+dy).unwrap_or(Tile::Wall);
                 if afterwall == Tile::Wall { continue }
@@ -58,7 +57,6 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
             } else { // bump into something else? dont go there
                 continue;
             } 
-             
         };
 
         // actually move (but not out of screen)
