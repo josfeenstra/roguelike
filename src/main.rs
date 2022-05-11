@@ -37,7 +37,7 @@ impl GameState for State {
     fn tick(&mut self, ctx : &mut Rltk) {
         ctx.cls();
         player_input(self, ctx);
-        move_projectiles(self, ctx);
+        move_projectiles(self);
         self.render(ctx);
     }
 }
@@ -60,20 +60,39 @@ impl State {
     }
 }
 
-pub fn move_projectiles(state: &mut State, _ctx : &mut Rltk) {
+pub fn move_projectiles(state: &mut State) {
 
-    let mut positions = state.ecs.write_storage::<Position>();
-    let mut projectiles = state.ecs.write_storage::<Projectile>();
-
-    for (mut pos, mut proj) in (&mut positions, &mut projectiles).join() {
-        proj.lifetime -= 1;
-        if proj.lifetime < 0 {
-            // kill it. but how?
-            // state.ecs.delete_entity()
+    let mut removed : Vec<Entity> = Vec::new();
+    
+    // I live to please the borrow checker
+    {
+        let entities = state.ecs.entities();
+        let mut positions = state.ecs.write_storage::<Position>();
+        let mut projectiles = state.ecs.write_storage::<Projectile>();
+        let mut map = state.ecs.fetch_mut::<Matrix<Tile>>();
+        
+        for (e, mut pos, mut proj) in (&entities, &mut positions, &mut projectiles).join() {
+            proj.lifetime -= 1;
+            if proj.lifetime < 0 {
+                removed.push(e);
+            }
+            let (dx, dy) = dir_to_xy(proj.dir);
+            let (nx, ny) = (pos.x + dx, pos.y + dy);
+            
+            let next_tile = map.get(nx, ny).unwrap_or(Tile::Wall);
+            let next_tile_free = next_tile == Tile::Abyss || next_tile == Tile::Floor; 
+            if next_tile_free {
+                pos.x += dx;
+                pos.y += dy;
+            } else {
+                let res = try_push(&mut map, nx, ny, proj.dir);
+                removed.push(e);
+            }
         }
-        let (dx, dy) = dir_to_xy(proj.dir);
-        pos.x += dx;
-        pos.y += dy;
+    }
+
+    for r in removed {
+        state.ecs.delete_entity(r).expect("Unable to delete");
     }
 }
 

@@ -40,7 +40,7 @@ impl<T: PartialEq + Clone + Copy> Matrix<T> {
 
 use rltk::RGB;
 
-use crate::cons;
+use crate::{cons, dir::{Dir, dir_to_xy}};
 
 
 #[derive(PartialEq, Clone, Copy)]
@@ -118,4 +118,39 @@ pub fn draw_world(map: &Matrix<Tile>, ctx : &mut rltk::Rltk) {
             y += 1;
         }
     }
+}
+
+pub fn try_push(map: &mut Matrix<Tile>, x: i32, y: i32, dir: Dir) -> PushResult {
+
+    let (dx, dy) = dir_to_xy(dir);
+    let tile = map.get(x, y).unwrap_or(Tile::Wall);
+    if tile != Tile::Floor { // bump into something?
+        if tile == Tile::Wall { // bump into wall?
+            let afterwall = map.get(x+dx, y+dy).unwrap_or(Tile::Wall);
+            if afterwall == Tile::Wall { return PushResult::Blocked }
+            if afterwall == Tile::Floor { // after wall floor? push.
+                map.set(x, y, Tile::Floor);
+                map.set(x+dx, y+dy, Tile::Wall);
+                return PushResult::Pushed;
+            }
+            if afterwall == Tile::Abyss { // after wall abyss? push it in
+                map.set(x, y, Tile::Floor);
+                map.set(x+dx, y+dy, Tile::Floor);
+                return PushResult::Tumble;
+            }
+        } 
+        // bump into something else? dont go there
+        return PushResult::Blocked;
+    };
+
+    // next tile is free!
+    return PushResult::Free;
+}
+
+#[derive(PartialEq)]
+pub enum PushResult {
+    Free, // nothing to push to begin with
+    Pushed, // we just pushed something to the next tile
+    Blocked, // something could be pushed, but was blocked by something standing behind it
+    Tumble, // we just pushed something down to a lower level
 }

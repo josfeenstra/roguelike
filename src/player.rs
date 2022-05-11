@@ -1,6 +1,6 @@
 use std::cmp::{min, max};
 
-use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Matrix, Tile}, State, cons};
+use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Matrix, Tile, try_push, PushResult}, State, cons};
 use rltk::{Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
@@ -41,27 +41,13 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         
         let (nx, ny) = (pos.x + dx, pos.y + dy);
         
-        let nb = map.get(nx, ny).unwrap_or(Tile::Wall);
-        if nb != Tile::Floor { // bump into something?
-            if nb == Tile::Wall { // bump into wall?
-                let afterwall = map.get(nx+dx, ny+dy).unwrap_or(Tile::Wall);
-                if afterwall == Tile::Wall { continue }
-                if afterwall == Tile::Floor { // after wall floor? push.
-                    map.set(nx, ny, Tile::Floor);
-                    map.set(nx+dx, ny+dy, Tile::Wall);
-                }
-                if afterwall == Tile::Abyss { // after wall abyss? push it in
-                    map.set(nx, ny, Tile::Floor);
-                    map.set(nx+dx, ny+dy, Tile::Floor);
-                }
-            } else { // bump into something else? dont go there
-                continue;
-            } 
-        };
+        let res = try_push(&mut map, nx, ny, dir);
 
-        // actually move (but not out of screen)
-        pos.x = min((cons::WIDTH - 1) as i32 , max(0, nx));
-        pos.y = min((cons::HEIGHT - 1) as i32, max(0, ny));
+        // actually move (but never out of screen)
+        if PushResult::Blocked != res {
+            pos.x = min((cons::WIDTH - 1) as i32 , max(0, nx));
+            pos.y = min((cons::HEIGHT - 1) as i32, max(0, ny));
+        }
     }
 }
 
@@ -81,11 +67,11 @@ fn get_player( ecs: &mut specs::World) -> (Position, Dir) {
 
 fn try_player_shoot(ecs: &mut World) {
     let (pos, dir) = get_player(ecs);
-    let (dx, dy) = dir_to_xy(dir);
+    // let (dx, dy) = dir_to_xy(dir);
 
     ecs
         .create_entity()
-        .with(Position::new(pos.x + dx, pos.y + dy))
+        .with(Position::new(pos.x, pos.y))
         .with(Projectile {dir, lifetime: 10})
         .with(Renderable::new(
             rltk::to_cp437('o'), 
