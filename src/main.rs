@@ -156,7 +156,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
 
-    // drawing_things(&mut gs.ecs);
+    drawing_things(&mut gs.ecs);
 
     // create the player
     gs.ecs
@@ -174,9 +174,12 @@ fn main() -> rltk::BError {
     gs.ecs.insert(maze);
 
     use rltk::RltkBuilder;
-    let context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT).unwrap()
-        .with_title("Roguelike Tutorial")
+    let mut context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT)
+        .unwrap()
+        .with_title("Roguelike")
         .build()?;
+        
+    context.with_post_scanlines(true);
 
     rltk::main_loop(context, gs)
 }
