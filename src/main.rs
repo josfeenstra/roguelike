@@ -75,6 +75,7 @@ pub fn move_projectiles(state: &mut State) {
             proj.lifetime -= 1;
             if proj.lifetime < 0 {
                 removed.push(e);
+                continue;
             }
             let (dx, dy) = dir_to_xy(proj.dir);
             let (nx, ny) = (pos.x + dx, pos.y + dy);
@@ -92,7 +93,7 @@ pub fn move_projectiles(state: &mut State) {
     }
 
     for r in removed {
-        state.ecs.delete_entity(r).expect("Unable to delete");
+        state.ecs.delete_entity(r);
     }
 }
 
