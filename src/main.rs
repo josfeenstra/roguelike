@@ -15,7 +15,6 @@ use crate::map::*;
 use crate::dir::*;
 use crate::components::*;
 use crate::player::*;
-use crate::matrix::*;
 
 ///////////////////////////////////////////////////////////
 
@@ -86,14 +85,14 @@ pub fn move_projectiles(state: &mut State) {
                 pos.x += dx;
                 pos.y += dy;
             } else {
-                let res = map.apply_push(nx, ny, proj.dir);
+                let _res = map.apply_push(nx, ny, proj.dir);
                 removed.push(e);
             }
         }
     }
 
     for r in removed {
-        state.ecs.delete_entity(r);
+        state.ecs.delete_entity(r).expect("could not delete entity...");
     }
 }
 
@@ -117,7 +116,7 @@ fn drawing_things(ecs: &mut World) {
 
         ecs
         .create_entity()
-        .with(Position::new(30 + x, y))
+        .with(Position::new(0 + x, y))
         .with(Renderable::new(
             i.try_into().unwrap(), 
             RGB::named(rltk::GREEN), 
@@ -125,22 +124,22 @@ fn drawing_things(ecs: &mut World) {
         .build();
     }
 
-    spawn(ecs, 7,6,'▲');
-    spawn(ecs, 8,7,'►');
-    spawn(ecs, 6,7,'◄');
-    spawn(ecs, 7,8,'▼');
-    spawn(ecs, 10,9,'╗');
-    spawn(ecs, 10,10,'║');
-    spawn(ecs, 10,11,'╝');
-    spawn(ecs, 8,9,'╔');
-    spawn(ecs, 8,10,'║');
-    spawn(ecs, 8,11,'╚');
-    spawn(ecs, 9,9,'═');
-    spawn(ecs, 9,11,'═');
-    spawn(ecs, 9,10,'▒');
-    spawn(ecs, 20,3,'░');
-    spawn(ecs, 20,4,'•');
-    spawn(ecs, 20,5,'◘');
+    // spawn(ecs, 7,6,'▲');
+    // spawn(ecs, 8,7,'►');
+    // spawn(ecs, 6,7,'◄');
+    // spawn(ecs, 7,8,'▼');
+    // spawn(ecs, 10,9,'╗');
+    // spawn(ecs, 10,10,'║');
+    // spawn(ecs, 10,11,'╝');
+    // spawn(ecs, 8,9,'╔');
+    // spawn(ecs, 8,10,'║');
+    // spawn(ecs, 8,11,'╚');
+    // spawn(ecs, 9,9,'═');
+    // spawn(ecs, 9,11,'═');
+    // spawn(ecs, 9,10,'▒');
+    // spawn(ecs, 20,3,'░');
+    // spawn(ecs, 20,4,'•');
+    // spawn(ecs, 20,5,'◘');
     
     // ╣║╗╝╚╔╩╦╠═╬
 }

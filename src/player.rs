@@ -22,7 +22,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
     let mut rends = ecs.write_storage::<Renderable>();
-    let mut map = ecs.fetch_mut::<Map>();
+    let map = ecs.fetch_mut::<Map>();
 
     let char = match dir {
         Dir::Left  => '◄',
@@ -40,11 +40,9 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         rends.glyph = rltk::to_cp437(char);
         
         let (nx, ny) = (pos.x + dx, pos.y + dy);
-        
-        let res = map.apply_push(nx, ny, dir);
 
         // actually move (but never out of screen)
-        if PushResult::Blocked != res {
+        if map.is_free(nx, ny) {
             pos.x = min((cons::WIDTH - 1) as i32 , max(0, nx));
             pos.y = min((cons::HEIGHT - 1) as i32, max(0, ny));
         }

@@ -71,6 +71,11 @@ impl Map {
         Map { tiles }
     }
 
+    pub fn is_free(&self, x: i32, y: i32) -> bool {
+        let t = self.tiles.get(x, y).unwrap_or(Tile::Wall);
+        t == Tile::Floor
+    }
+
     pub fn render(&self, ctx : &mut rltk::Rltk) {
     
         let mut y = 0;
