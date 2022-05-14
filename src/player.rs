@@ -1,6 +1,6 @@
 use std::cmp::{min, max};
 
-use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Matrix, Tile, try_push, PushResult}, State, cons};
+use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Tile, PushResult, Map}, State, cons, matrix::Matrix};
 use rltk::{Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
@@ -22,7 +22,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
     let mut rends = ecs.write_storage::<Renderable>();
-    let mut map = ecs.fetch_mut::<Matrix<Tile>>();
+    let mut map = ecs.fetch_mut::<Map>();
 
     let char = match dir {
         Dir::Left  => '◄',
@@ -41,7 +41,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         
         let (nx, ny) = (pos.x + dx, pos.y + dy);
         
-        let res = try_push(&mut map, nx, ny, dir);
+        let res = map.apply_push(nx, ny, dir);
 
         // actually move (but never out of screen)
         if PushResult::Blocked != res {
