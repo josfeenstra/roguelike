@@ -162,7 +162,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
 
-    drawing_things(&mut gs.ecs);
+    // drawing_things(&mut gs.ecs);
 
     // create the player
     gs.ecs
