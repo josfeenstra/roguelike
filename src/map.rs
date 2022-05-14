@@ -85,27 +85,33 @@ impl Map {
             match tile {
                 Tile::Floor => {
                     ctx.set(x, y, 
-                        RGB::from_u8(8, 30, 140), 
+                        cons::RGB_BACKGROUND, 
                         cons::RGB_BACKGROUND, 
                         rltk::to_cp437('#')); // •
                 }
                 Tile::Wall => {
+                    let char = getwall(
+                        self.tiles.get(x, y-1).unwrap_or(Tile::Floor),
+                        self.tiles.get(x-1, y).unwrap_or(Tile::Floor),
+                        self.tiles.get(x, y+1).unwrap_or(Tile::Floor),
+                        self.tiles.get(x+1, y).unwrap_or(Tile::Floor),
+                    );
                     ctx.set(x, y, 
-                        RGB::from_u8(0, 255, 0), 
+                        RGB::from_u8(140, 140, 160), 
                         cons::RGB_BACKGROUND, 
-                        rltk::to_cp437('#'));
+                        rltk::to_cp437(char));
                 }
                 Tile::Abyss => {
                     ctx.set(x, y, 
-                        RGB::from_u8(10, 10, 10), 
+                        cons::RGB_BACKGROUND, 
                         RGB::from_u8(0, 0, 0), 
-                        rltk::to_cp437(' '));
+                        rltk::to_cp437(' ')); //α
                 }
             }
     
             // Move the coordinates
             x += 1;
-            if x > self.tiles.width - 1 {
+            if x > self.tiles.width as i32 - 1 {
                 x = 0;
                 y += 1;
             }
@@ -140,6 +146,36 @@ impl Map {
     }
 }        
 
+/// do all the walling
+/// o╣║╗╝╚╔╩╦╠═╬
+/// ╨╞╡◙
+fn getwall(up: Tile, left: Tile, bot: Tile, right: Tile) -> char {
+    
+    let i = (up == Tile::Wall) as i32 +
+         (right == Tile::Wall) as i32 * 2 + 
+           (bot == Tile::Wall) as i32 * 4+ 
+          (left == Tile::Wall) as i32 * 8;
 
+    match i {
+        //ldru
+        0b0000 => '■', // unconnected
+        0b0001 => '║', 
+        0b0010 => '═',  
+        0b0011 => '╚', 
+        0b0100 => '║', 
+        0b0101 => '║',  
+        0b0110 => '╔', 
+        0b0111 => '╠', // filled
+        0b1000 => '═', 
+        0b1001 => '╝', 
+        0b1010 => '═',  
+        0b1011 => '╩', 
+        0b1100 => '╗', 
+        0b1101 => '╣',  
+        0b1110 => '╦', 
+        0b1111 => '╬', // filled
+        _ => '■'
+    }
+}
 
 

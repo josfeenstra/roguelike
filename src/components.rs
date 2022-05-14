@@ -1,3 +1,7 @@
+/**
+ * Contains some base components for the entity component system.
+ * Should get their own files if we are feeling fancy
+ */
 use specs::prelude::*;
 use specs_derive::Component;
 use rltk::{RGB};

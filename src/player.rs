@@ -1,6 +1,6 @@
 use std::cmp::{min, max};
 
-use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Tile, PushResult, Map}, State, cons, matrix::Matrix};
+use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Map}, State, cons};
 use rltk::{Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
@@ -15,6 +15,8 @@ impl Player {
     pub fn new() -> Self {
         Self { dir: Dir::Right }
     }
+
+
 }
 
 fn try_move_player(dir: Dir, ecs: &mut World) {
@@ -72,8 +74,8 @@ fn try_player_shoot(ecs: &mut World) {
         .with(Position::new(pos.x, pos.y))
         .with(Projectile {dir, lifetime: 10})
         .with(Renderable::new(
-            rltk::to_cp437('o'), 
-            RGB::named(rltk::GRAY), 
+            rltk::to_cp437('◙'), 
+            RGB::named(rltk::BLUE2), 
             RGB::named(rltk::BLACK)))
         .build();
 }

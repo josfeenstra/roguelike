@@ -1,5 +1,9 @@
 #![allow(dead_code)]
 
+/**
+ * main contains main, but also all non-refactored stuff 
+ */
+
 use map::Tile;
 use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
@@ -16,11 +20,7 @@ use crate::dir::*;
 use crate::components::*;
 use crate::player::*;
 
-///////////////////////////////////////////////////////////
 
-pub struct State {
-    ecs: World,
-}
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -29,6 +29,9 @@ fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 4, "  Levels");
     ctx.print(4, cons::HH + 5, "  Options");
     ctx.print(4, cons::HH + 6, "  Quit");
+}
+pub struct State {
+    ecs: World,
 }
 
 impl GameState for State {
@@ -124,6 +127,7 @@ fn drawing_things(ecs: &mut World) {
         .build();
     }
 
+    // spawn(ecs, 7,6,'█');
     // spawn(ecs, 7,6,'▲');
     // spawn(ecs, 8,7,'►');
     // spawn(ecs, 6,7,'◄');
@@ -141,8 +145,11 @@ fn drawing_things(ecs: &mut World) {
     // spawn(ecs, 20,4,'•');
     // spawn(ecs, 20,5,'◘');
     
-    // ╣║╗╝╚╔╩╦╠═╬
+    // o╣║╗╝╚╔╩╦╠═╬
+    // ╨╞╡
 }
+
+/////////////////////////////////////////////////////////////////
 
 fn main() -> rltk::BError {
 
@@ -164,12 +171,12 @@ fn main() -> rltk::BError {
         .with(Renderable::new(
             rltk::to_cp437('►'), 
             RGB::named((255,0,0)), 
-            RGB::named((0,0,0))))
+            cons::RGB_BACKGROUND))
         .with(Player::new())
         .build();
 
     // render the world
-    let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 200, 100);
+    let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 500, 100);
     gs.ecs.insert(maze);
 
     use rltk::RltkBuilder;
@@ -178,7 +185,7 @@ fn main() -> rltk::BError {
         .with_title("Roguelike")
         .build()?;
         
-    context.with_post_scanlines(true);
+    // context.with_post_scanlines(true);
 
     rltk::main_loop(context, gs)
 }

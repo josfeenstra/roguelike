@@ -1,3 +1,7 @@
+/**
+ * General purpose direction
+ */
+
 use specs::prelude::*;
 use specs_derive::Component;
 
