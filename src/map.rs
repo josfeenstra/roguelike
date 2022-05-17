@@ -1,4 +1,4 @@
-use std::{borrow::{Borrow, BorrowMut}, task::Context};
+use std::{borrow::{Borrow, BorrowMut}};
 
 use crate::{cons, dir::{Dir}, matrix::Matrix, components::Position, js};
 use rand::prelude::SliceRandom;
@@ -153,7 +153,7 @@ impl Map {
                 let dir = match try_select(&mut rng, &a, &maze) {
                     Some(dir) => dir,
                     None => {
-                        continue;
+                        // continue;
                         get_valid_dirs(&a, width as i32, height as i32)
                             .choose(rng.get_rng())
                             .unwrap()
