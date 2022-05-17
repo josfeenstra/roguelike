@@ -1,7 +1,7 @@
 use std::borrow::{Borrow, BorrowMut};
 
-use crate::{cons, dir::{Dir, dir_to_xy}, matrix::Matrix};
-use rltk::RGB;
+use crate::{cons, dir::{Dir}, matrix::Matrix, components::Position, js};
+use rltk::{RGB, RandomNumberGenerator};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Tile {
@@ -71,6 +71,79 @@ impl Map {
         Map { tiles }
     }
 
+    pub fn new_empty(width: usize, height: usize, filler: Tile, border: bool) -> Map {
+        let mut tiles = Matrix::new(width, height, filler);
+    
+        let w = width as i32;
+        let h = height as i32;
+        
+        if border {
+            for i in 0..w {
+                tiles.set(i, 0, Tile::Wall);
+                tiles.set(i, h-1, Tile::Wall);
+            } 
+            for i in 0..h {
+                tiles.set(0, i, Tile::Wall);
+                tiles.set(w-1, i, Tile::Wall);
+            } 
+        }
+
+        Map { tiles }
+    }
+
+    pub fn new_maze(width: usize, height: usize, num_agents: usize) -> Map {
+        
+        fn to_even(n: i32) -> i32 {
+            n / 2 * 2
+        }
+        
+        // create the area filled with walls
+        let mut maze = Self::new_empty(width, height, Tile::Wall, true);
+        
+        // build a bunch of agents 
+        let mut rng = RandomNumberGenerator::new();
+        let mut agents: Vec<Position> = Vec::new();
+        for _ in 0..3 {
+            let pos = Position {
+                x: to_even(rng.range(1, width as i32 - 1)),
+                y: to_even(rng.range(1, height as i32 - 1)),
+            };
+            maze.tiles.set(pos.x, pos.y, Tile::Floor);
+            agents.push(pos);
+        }
+
+        fn pick_direction(mut rng: RandomNumberGenerator, p: Position, m: Map) {
+            
+
+            rng.rand() 
+        }
+
+        // let them walk around
+        for _ in 0..100 {
+            for a in agents.iter_mut() {
+                // during selection, prioritize unvisited tiles
+                let dir: Dir = rng.rand(); 
+
+                let (dx, dy) = dir.to_xy();
+                for _ in 0..2 {
+                    a.x = (a.x + dx).clamp(1, width as i32 - 2);
+                    a.y = (a.y + dy).clamp(1, height as i32 - 2);
+                    maze.tiles.set(a.x, a.y, Tile::Floor);
+                }
+            }
+        }
+
+        js::print(&format!("{}", to_even(5)));
+
+        // let them run wild for a couple of iterations
+        // for _ in 0..1000 {
+        //     num_agents
+        // }
+
+        // return this maze
+        maze
+    }
+
     pub fn is_free(&self, x: i32, y: i32) -> bool {
         let t = self.tiles.get(x, y).unwrap_or(Tile::Wall);
         t == Tile::Floor
@@ -120,7 +193,7 @@ impl Map {
 
     pub fn apply_push(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
     
-        let (dx, dy) = dir_to_xy(dir);
+        let (dx, dy) = dir.to_xy();
         let tile = self.tiles.get(x, y).unwrap_or(Tile::Wall);
         if tile != Tile::Floor { // bump into something?
             if tile == Tile::Wall { // bump into wall?
@@ -177,5 +250,3 @@ fn getwall(up: Tile, left: Tile, bot: Tile, right: Tile) -> char {
         _ => '■'
     }
 }
-
-

@@ -1,6 +1,6 @@
 use std::cmp::{min, max};
 
-use crate::{dir::{Dir, dir_to_xy}, components::{Position, Renderable, Projectile}, map::{Map}, State, cons};
+use crate::{dir::{Dir}, components::{Position, Renderable, Projectile}, map::{Map}, State, cons};
 use rltk::{Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
@@ -33,7 +33,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         Dir::Down  => '▼',
     };
 
-    let (dx, dy) = dir_to_xy(dir);
+    let (dx, dy) = dir.to_xy();
 
     for (player, pos, rends) in (&mut players, &mut positions, &mut rends).join() {
 

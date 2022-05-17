@@ -14,13 +14,14 @@ mod dir;
 mod components;
 mod player;
 mod matrix;
+mod js;
 
 use crate::map::*;
 use crate::dir::*;
 use crate::components::*;
 use crate::player::*;
 
-
+use crate::js::*;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -79,7 +80,7 @@ pub fn move_projectiles(state: &mut State) {
                 removed.push(e);
                 continue;
             }
-            let (dx, dy) = dir_to_xy(proj.dir);
+            let (dx, dy) = proj.dir.to_xy();
             let (nx, ny) = (pos.x + dx, pos.y + dy);
             
             let next_tile = map.get_tiles().get(nx, ny).unwrap_or(Tile::Wall);
@@ -151,6 +152,7 @@ fn drawing_things(ecs: &mut World) {
 
 /////////////////////////////////////////////////////////////////
 
+
 fn main() -> rltk::BError {
 
     let mut gs = State {
@@ -176,7 +178,7 @@ fn main() -> rltk::BError {
         .build();
 
     // render the world
-    let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 500, 100);
+    let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT, 10);
     gs.ecs.insert(maze);
 
     use rltk::RltkBuilder;
