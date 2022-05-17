@@ -17,11 +17,8 @@ mod matrix;
 mod js;
 
 use crate::map::*;
-use crate::dir::*;
 use crate::components::*;
 use crate::player::*;
-
-use crate::js::*;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -178,11 +175,11 @@ fn main() -> rltk::BError {
         .build();
 
     // render the world
-    let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT, 10);
+    let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT);
     gs.ecs.insert(maze);
 
     use rltk::RltkBuilder;
-    let mut context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT)
+    let context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT)
         .unwrap()
         .with_title("Roguelike")
         .build()?;

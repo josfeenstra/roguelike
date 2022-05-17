@@ -91,7 +91,7 @@ impl Map {
         Map { tiles }
     }
 
-    pub fn new_maze(width: usize, height: usize, num_agents: usize) -> Map {
+    pub fn new_maze(width: usize, height: usize) -> Map {
         
         fn to_even(n: i32) -> i32 {
             n / 2 * 2
