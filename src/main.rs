@@ -166,7 +166,7 @@ fn main() -> rltk::BError {
     // create the player
     gs.ecs
         .create_entity()
-        .with(Position::new(20, 20))
+        .with(Position::new(17, 17))
         .with(Renderable::new(
             rltk::to_cp437('►'), 
             RGB::named((255,0,0)), 

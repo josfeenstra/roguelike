@@ -18,7 +18,18 @@ pub enum Dir {
 }
 
 impl Dir {
-    pub fn next(&self) -> Dir {
+
+    pub fn from_num(i: i32) -> Dir {
+        assert!(i > -1 && i < 4);
+        match i {
+            0 => Dir::Left,
+            1 => Dir::Down,
+            2 => Dir::Right,
+            _ => Dir::Up,
+        }
+    }
+
+    pub fn next(self) -> Dir {
         match self {
             Dir::Left => Dir::Down,
             Dir::Down => Dir::Right,
@@ -27,7 +38,7 @@ impl Dir {
         }    
     }
 
-    pub fn prev(&self) -> Dir {
+    pub fn prev(self) -> Dir {
         match self {
             Dir::Left => Dir::Up,
             Dir::Down => Dir::Left,
@@ -36,7 +47,7 @@ impl Dir {
         }    
     }
 
-    pub fn to_xy(&self) -> (i32, i32) {
+    pub fn to_xy(self) -> (i32, i32) {
         match self {
             Dir::Left => (-1, 0),
             Dir::Right => (1, 0),

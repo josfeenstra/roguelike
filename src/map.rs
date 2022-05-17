@@ -1,6 +1,7 @@
-use std::borrow::{Borrow, BorrowMut};
+use std::{borrow::{Borrow, BorrowMut}, task::Context};
 
 use crate::{cons, dir::{Dir}, matrix::Matrix, components::Position, js};
+use rand::prelude::SliceRandom;
 use rltk::{RGB, RandomNumberGenerator};
 
 #[derive(PartialEq, Clone, Copy)]
@@ -96,38 +97,75 @@ impl Map {
         fn to_even(n: i32) -> i32 {
             n / 2 * 2
         }
-        
+
+        /// get only the valid directions, so we never choose something out of bounds
+        fn get_valid_dirs(a: &Position, width: i32, height : i32) -> Vec<Dir> {
+            let mut options: Vec<Dir> = Vec::new();
+            for i in 0..4 {
+                let dir = Dir::from_num(i);
+                let (dx, dy) = dir.to_xy();
+                let (nx, ny) = (a.x + dx * 2, a.y + dy * 2);
+                if nx < 1 || nx > width - 2 || ny < 1 || ny > height - 2 {
+                    continue;
+                }
+                options.push(dir);
+            }
+            options
+        }
+
+        // select a direction, prioritize unvisited tiles
+        fn try_select(rng: &mut RandomNumberGenerator, a: &Position, maze: &Map) -> Option<Dir> {
+            let rand = rng.get_rng();
+            let mut valid_dirs = get_valid_dirs(
+                &a, maze.tiles.width as i32, maze.tiles.height as i32);
+            valid_dirs.shuffle(rand);
+            for dir in valid_dirs.iter() {
+                let (dx, dy) = dir.to_xy();
+                let t = maze.tiles.get(a.x + dx * 2, a.y + dy * 2).unwrap();
+                if t == Tile::Floor {
+                    // skip this iteration
+                    continue;
+                } 
+                return Some(dir.clone());
+            }
+            None
+        }
+
         // create the area filled with walls
         let mut maze = Self::new_empty(width, height, Tile::Wall, true);
         
         // build a bunch of agents 
         let mut rng = RandomNumberGenerator::new();
-        let mut agents: Vec<Position> = Vec::new();
-        for _ in 0..3 {
+        let mut positions: Vec<Position> = Vec::new();
+
+        for _ in 0..100 {
             let pos = Position {
-                x: to_even(rng.range(1, width as i32 - 1)),
-                y: to_even(rng.range(1, height as i32 - 1)),
+                x: to_even(rng.range(0, width as i32 - 2)) + 1,
+                y: to_even(rng.range(0, height as i32 - 2)) + 1,
             };
             maze.tiles.set(pos.x, pos.y, Tile::Floor);
-            agents.push(pos);
+            positions.push(pos);
         }
 
-        fn pick_direction(mut rng: RandomNumberGenerator, p: Position, m: Map) {
-            
-
-            rng.rand() 
-        }
-
-        // let them walk around
-        for _ in 0..100 {
-            for a in agents.iter_mut() {
-                // during selection, prioritize unvisited tiles
-                let dir: Dir = rng.rand(); 
+        // let them walk around, digging tunnels
+        for _ in 0..6 {
+            for a in positions.iter_mut() {
+                let dir = match try_select(&mut rng, &a, &maze) {
+                    Some(dir) => dir,
+                    None => {
+                        continue;
+                        get_valid_dirs(&a, width as i32, height as i32)
+                            .choose(rng.get_rng())
+                            .unwrap()
+                            .to_owned()
+                    },
+                };
 
                 let (dx, dy) = dir.to_xy();
+
                 for _ in 0..2 {
-                    a.x = (a.x + dx).clamp(1, width as i32 - 2);
-                    a.y = (a.y + dy).clamp(1, height as i32 - 2);
+                    a.x = (a.x + dx).clamp(0, width as i32);
+                    a.y = (a.y + dy).clamp(0, height as i32);
                     maze.tiles.set(a.x, a.y, Tile::Floor);
                 }
             }
