@@ -1,2 +1,4 @@
 /target
 Cargo.lock
+wasm/roguelike_bg.wasm
+wasm/roguelike.js

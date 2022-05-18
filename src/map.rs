@@ -113,11 +113,10 @@ impl Map {
             options
         }
 
-        // select a direction, prioritize unvisited tiles
+        /// select a random direction with unvisited tiles
         fn try_select(rng: &mut RandomNumberGenerator, a: &Position, maze: &Map) -> Option<Dir> {
             let rand = rng.get_rng();
-            let mut valid_dirs = get_valid_dirs(
-                &a, maze.tiles.width as i32, maze.tiles.height as i32);
+            let mut valid_dirs = get_valid_dirs(&a, maze.tiles.width as i32, maze.tiles.height as i32);
             valid_dirs.shuffle(rand);
             for dir in valid_dirs.iter() {
                 let (dx, dy) = dir.to_xy();
@@ -131,6 +130,10 @@ impl Map {
             None
         }
 
+        let continuous = false;
+        let num_agents = 100;
+        let num_iterations = 6;
+
         // create the area filled with walls
         let mut maze = Self::new_empty(width, height, Tile::Wall, true);
         
@@ -138,7 +141,7 @@ impl Map {
         let mut rng = RandomNumberGenerator::new();
         let mut positions: Vec<Position> = Vec::new();
 
-        for _ in 0..100 {
+        for _ in 0..num_agents {
             let pos = Position {
                 x: to_even(rng.range(0, width as i32 - 2)) + 1,
                 y: to_even(rng.range(0, height as i32 - 2)) + 1,
@@ -148,16 +151,22 @@ impl Map {
         }
 
         // let them walk around, digging tunnels
-        for _ in 0..6 {
+        for _ in 0..num_iterations {
             for a in positions.iter_mut() {
                 let dir = match try_select(&mut rng, &a, &maze) {
                     Some(dir) => dir,
                     None => {
-                        // continue;
-                        get_valid_dirs(&a, width as i32, height as i32)
-                            .choose(rng.get_rng())
-                            .unwrap()
-                            .to_owned()
+                        // what to do if all directions are already visisted?
+                        if continuous {
+                            // go wander visited regions by selecting a valid direction
+                            get_valid_dirs(&a, width as i32, height as i32)
+                                .choose(rng.get_rng())
+                                .unwrap()
+                                .to_owned()   
+                        } else {
+                            // just dont go any further. TODO `a` should be deleted
+                            continue;
+                        }
                     },
                 };
 
