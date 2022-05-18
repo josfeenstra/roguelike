@@ -8,6 +8,7 @@ use map::Tile;
 use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
 
+mod geo;
 mod map;
 mod cons;
 mod dir;
@@ -19,6 +20,8 @@ mod js;
 use crate::map::*;
 use crate::components::*;
 use crate::player::*;
+use geo::Circle;
+use geo::Point;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -110,19 +113,24 @@ fn spawn(ecs: &mut World, x: i32, y: i32, c: char) {
 
 fn drawing_things(ecs: &mut World) {
 
-    for i in 0..256 {
+    // for i in 0..256 {
 
-        let x = i % 16;
-        let y = i / 16;
+    //     let x = i % 16;
+    //     let y = i / 16;
 
-        ecs
-        .create_entity()
-        .with(Position::new(0 + x, y))
-        .with(Renderable::new(
-            i.try_into().unwrap(), 
-            RGB::named(rltk::GREEN), 
-            RGB::named(rltk::BLACK)))
-        .build();
+    //     ecs
+    //     .create_entity()
+    //     .with(Position::new(0 + x, y))
+    //     .with(Renderable::new(
+    //         i.try_into().unwrap(), 
+    //         RGB::named(rltk::GREEN), 
+    //         RGB::named(rltk::BLACK)))
+    //     .build();
+    // }
+
+    let circle = Circle::new(Point::new(10, 10), 7.5);
+    for p in circle.grid_border() {
+        spawn(ecs, p.x, p.y, 'X');
     }
 
     // spawn(ecs, 7,6,'█');
@@ -161,7 +169,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
 
-    // drawing_things(&mut gs.ecs);
+    drawing_things(&mut gs.ecs);
 
     // create the player
     gs.ecs
