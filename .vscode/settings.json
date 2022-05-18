@@ -16,9 +16,13 @@
             }
         ]
     },
+    "editor.tokenColorCustomizations": {
+        "comments": "#60616b"
+    },
+
     "editor.semanticTokenColorCustomizations": {
         "rules": {
-        "*.mutable": {"underline": false}
-        }
-      }
+            "*.mutable": {"underline": false},
+        },
+    },
 }

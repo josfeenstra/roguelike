@@ -130,7 +130,7 @@ impl Map {
             None
         }
 
-        let continuous = false;
+        let openness = 50; // number between 0 and 100, with 0 being very claustrofobic, and 100 being almost not a maze anymore
         let num_agents = 100;
         let num_iterations = 6;
 
@@ -139,7 +139,7 @@ impl Map {
         
         // build a bunch of agents 
         let mut rng = RandomNumberGenerator::new();
-        let mut positions: Vec<Position> = Vec::new();
+        let mut positions: Vec<(Position, bool)> = Vec::new();
 
         for _ in 0..num_agents {
             let pos = Position {
@@ -147,17 +147,18 @@ impl Map {
                 y: to_even(rng.range(0, height as i32 - 2)) + 1,
             };
             maze.tiles.set(pos.x, pos.y, Tile::Floor);
-            positions.push(pos);
+            let continuous: bool = rng.range::<i32>(0, 100) < openness;
+            positions.push((pos, continuous));
         }
 
         // let them walk around, digging tunnels
         for _ in 0..num_iterations {
-            for a in positions.iter_mut() {
+            for (a, continuous) in positions.iter_mut() {
                 let dir = match try_select(&mut rng, &a, &maze) {
                     Some(dir) => dir,
                     None => {
                         // what to do if all directions are already visisted?
-                        if continuous {
+                        if *continuous {
                             // go wander visited regions by selecting a valid direction
                             get_valid_dirs(&a, width as i32, height as i32)
                                 .choose(rng.get_rng())
@@ -266,9 +267,9 @@ impl Map {
     }
 }        
 
-/// do all the walling
-/// o╣║╗╝╚╔╩╦╠═╬
-/// ╨╞╡◙
+/// do all the walling. 
+/// some characters: o╣║╗╝╚╔╩╦╠═╬╨╞╡◙
+/// not sure about the singulars, the 'columns. ohwell'
 fn getwall(up: Tile, left: Tile, bot: Tile, right: Tile) -> char {
     
     let i = (up == Tile::Wall) as i32 +
