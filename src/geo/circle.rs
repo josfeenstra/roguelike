@@ -46,9 +46,7 @@ impl Circle {
         for dy in 0..=size_y {
             let fdy = dy as f32;
             let dx  = ((radius*radius - fdy * fdy) as f32).sqrt().floor() as i32;
-            // let left  = (center.x as f32 - dx).ceil() as i32;
-            // let right = (center.x as f32 + dx).floor() as i32;
-            
+ 
             if dy != 0 { // eliminate ortagonal duplicates
                 border.push(Point::new(center.x - dx, center.y - dy));
                 border.push(Point::new(center.x + dx, center.y + dy));
