@@ -67,16 +67,22 @@ impl Circle {
         border
     }
 
-    /// from: angle in degrees, 
-    /// to: angle in degrees,
+    /// from: angle in radians, 
+    /// to: angle in radians,
     /// NOTE: this is not the cleanest approach
+    /// - we first calculate a full circle 
+    /// - we do stupid things with the angles, not foolproof
     pub fn grid_arc(&self, from: f32, to: f32) -> Vec<Point> {
         let circle = self.grid_border();
 
         js::print(&format!("angle range {} {}",from, to));
-
+        
         let arc = circle.into_iter().filter(|p| {
-            p.angle() == 0.0
+            let angle = p.sub(&self.center).angle();
+            js::print(&format!("angle range {}",angle));
+            from < angle && angle <= to || 
+            from < angle+cons::TWO_PI && angle+cons::TWO_PI <= to ||
+            from < angle-cons::TWO_PI && angle-cons::TWO_PI <= to
         }).collect();
 
         arc

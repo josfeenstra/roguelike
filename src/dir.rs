@@ -57,8 +57,8 @@ impl Dir {
         }
     }
 
-    /// the degree in respect to the positive X axis, going counter clockwise (as conventional within 3d engines)
-    pub fn degree(&self) -> i32 {
+    /// the angle in **degrees** in respect to the positive X axis, going counter clockwise (as conventional within 3d engines)
+    pub fn deg(&self) -> i32 {
         match self {
             Dir::Right => 0,
             Dir::Up    => 90,
@@ -67,7 +67,8 @@ impl Dir {
         }
     }
 
-    pub fn radians(&self) -> f32 {
+    /// the angle in **radians** in respect to the positive X axis, going counter clockwise (as conventional within 3d engines)
+    pub fn rad(&self) -> f32 {
         match self {
             Dir::Right => 0.0,
             Dir::Up    => cons::HALF_PI,

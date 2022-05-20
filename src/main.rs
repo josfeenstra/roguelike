@@ -22,6 +22,7 @@ use crate::components::*;
 use crate::player::*;
 use geo::Circle;
 use geo::Point;
+use dir::Dir;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -129,7 +130,9 @@ fn drawing_things(ecs: &mut World) {
     // }
 
     let circle = Circle::new(Point::new(10, 10), 7.5);
-    for p in circle.grid_arc(-cons::PI, cons::PI) {
+    let dir = Dir::Down;
+    let range = cons::PI * 0.6;
+    for p in circle.grid_arc(dir.rad() - range, dir.rad() + range) {
         spawn(ecs, p.x, p.y, 'X');
     }
 
