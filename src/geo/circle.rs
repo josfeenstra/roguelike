@@ -1,4 +1,4 @@
-use crate::geo::point::Point;
+use crate::{geo::point::Point, cons, js};
 
 /// represents a circle on the grid
 pub struct Circle {
@@ -66,4 +66,19 @@ impl Circle {
 
         border
     }
+
+    /// from: angle in degrees, 
+    /// to: angle in degrees,
+    /// NOTE: this is not the cleanest approach
+    pub fn grid_arc(&self, from: f32, to: f32) -> Vec<Point> {
+        let circle = self.grid_border();
+
+        js::print(&format!("angle range {} {}",from, to));
+
+        let arc = circle.into_iter().filter(|p| {
+            p.angle() == 0.0
+        }).collect();
+
+        arc
+    } 
 }

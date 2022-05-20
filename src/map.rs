@@ -103,7 +103,7 @@ impl Map {
             let mut options: Vec<Dir> = Vec::new();
             for i in 0..4 {
                 let dir = Dir::from_num(i);
-                let (dx, dy) = dir.to_xy();
+                let (dx, dy) = dir.xy();
                 let (nx, ny) = (a.x + dx * 2, a.y + dy * 2);
                 if nx < 1 || nx > width - 2 || ny < 1 || ny > height - 2 {
                     continue;
@@ -119,7 +119,7 @@ impl Map {
             let mut valid_dirs = get_valid_dirs(&a, maze.tiles.width as i32, maze.tiles.height as i32);
             valid_dirs.shuffle(rand);
             for dir in valid_dirs.iter() {
-                let (dx, dy) = dir.to_xy();
+                let (dx, dy) = dir.xy();
                 let t = maze.tiles.get(a.x + dx * 2, a.y + dy * 2).unwrap();
                 if t == Tile::Floor {
                     // skip this iteration
@@ -171,7 +171,7 @@ impl Map {
                     },
                 };
 
-                let (dx, dy) = dir.to_xy();
+                let (dx, dy) = dir.xy();
 
                 for _ in 0..2 {
                     a.x = (a.x + dx).clamp(0, width as i32);
@@ -241,7 +241,7 @@ impl Map {
 
     pub fn apply_push(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
     
-        let (dx, dy) = dir.to_xy();
+        let (dx, dy) = dir.xy();
         let tile = self.tiles.get(x, y).unwrap_or(Tile::Wall);
         if tile != Tile::Floor { // bump into something?
             if tile == Tile::Wall { // bump into wall?

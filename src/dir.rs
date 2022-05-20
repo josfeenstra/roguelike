@@ -7,7 +7,8 @@ use specs_derive::Component;
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
-}; // 0.8.0
+};
+use crate::cons; // 0.8.0
 
 #[derive(Component, Debug, Copy, Clone, PartialEq)]
 pub enum Dir {
@@ -29,7 +30,7 @@ impl Dir {
         }
     }
 
-    pub fn next(self) -> Dir {
+    pub fn next(&self) -> Dir {
         match self {
             Dir::Left => Dir::Down,
             Dir::Down => Dir::Right,
@@ -38,7 +39,7 @@ impl Dir {
         }    
     }
 
-    pub fn prev(self) -> Dir {
+    pub fn prev(&self) -> Dir {
         match self {
             Dir::Left => Dir::Up,
             Dir::Down => Dir::Left,
@@ -47,12 +48,31 @@ impl Dir {
         }    
     }
 
-    pub fn to_xy(self) -> (i32, i32) {
+    pub fn xy(&self) -> (i32, i32) {
         match self {
             Dir::Left => (-1, 0),
             Dir::Right => (1, 0),
             Dir::Up => (0, -1),
             Dir::Down => (0, 1),
+        }
+    }
+
+    /// the degree in respect to the positive X axis, going counter clockwise (as conventional within 3d engines)
+    pub fn degree(&self) -> i32 {
+        match self {
+            Dir::Right => 0,
+            Dir::Up    => 90,
+            Dir::Left  => 180,
+            Dir::Down  => 270,
+        }
+    }
+
+    pub fn radians(&self) -> f32 {
+        match self {
+            Dir::Right => 0.0,
+            Dir::Up    => cons::HALF_PI,
+            Dir::Left  => cons::PI,
+            Dir::Down  => cons::HALF_PI * 3.0,
         }
     }
 }

@@ -1,5 +1,7 @@
 use specs::prelude::*;
 use specs_derive::Component;
+use crate::cons;
+use std::ops::{Add, Sub};
 
 #[derive(Component)]
 pub struct Point {
@@ -10,5 +12,28 @@ pub struct Point {
 impl Point {
     pub fn new(x: i32, y: i32) -> Self {
         Self {x, y}
+    }
+
+    // computes the angle in radians with respect to the positive x-axis
+    pub fn angle(&self) -> f32 {
+        f32::atan2(-self.y as f32, -self.x as f32) + cons::PI
+    }
+}
+
+impl Add for Point {
+    type Output = Self;
+
+    #[inline]
+    fn add(self, other: Self) -> Self {
+        Self {x: self.x + other.x, y: self.y + other.y}
+    }
+}
+
+impl Sub for Point {
+    type Output = Self;
+
+    #[inline]
+    fn sub(self, other: Self) -> Self {
+        Self {x: self.x - other.x, y: self.y - other.y}
     }
 }

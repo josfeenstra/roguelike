@@ -80,7 +80,7 @@ pub fn move_projectiles(state: &mut State) {
                 removed.push(e);
                 continue;
             }
-            let (dx, dy) = proj.dir.to_xy();
+            let (dx, dy) = proj.dir.xy();
             let (nx, ny) = (pos.x + dx, pos.y + dy);
             
             let next_tile = map.get_tiles().get(nx, ny).unwrap_or(Tile::Wall);
@@ -129,7 +129,7 @@ fn drawing_things(ecs: &mut World) {
     // }
 
     let circle = Circle::new(Point::new(10, 10), 7.5);
-    for p in circle.grid_border() {
+    for p in circle.grid_arc(-cons::PI, cons::PI) {
         spawn(ecs, p.x, p.y, 'X');
     }
 

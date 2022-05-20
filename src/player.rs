@@ -33,7 +33,7 @@ fn try_move_player(dir: Dir, ecs: &mut World) {
         Dir::Down  => '▼',
     };
 
-    let (dx, dy) = dir.to_xy();
+    let (dx, dy) = dir.xy();
 
     for (player, pos, rends) in (&mut players, &mut positions, &mut rends).join() {
 
