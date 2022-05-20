@@ -21,7 +21,6 @@ mod state;
 use geo::Circle;
 use geo::Point;
 use geo::Line;
-use systems::projectile_system;
 use util::Dir;
 
 use crate::components::Player;

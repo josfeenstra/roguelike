@@ -1,5 +1,4 @@
-use crate::{components::{Position, Player}, map::{Map, Tile}, state::MyState};
-use specs::Entity;
+use crate::{components::{Position, Player}, map::{Map}, state::MyState};
 use specs::prelude::*;
 
 pub fn light_system(state: &mut MyState) {

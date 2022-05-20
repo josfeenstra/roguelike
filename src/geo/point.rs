@@ -1,7 +1,6 @@
 use specs::prelude::*;
 use specs_derive::Component;
 use crate::cons;
-use std::ops::{Add, Sub};
 
 #[derive(Component)]
 pub struct Point {

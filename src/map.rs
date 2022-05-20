@@ -1,6 +1,6 @@
 use std::{borrow::{Borrow, BorrowMut}};
 
-use crate::{cons, util::{Dir, self}, util::Matrix, components::Position, util::print};
+use crate::{cons, util::{Dir, self}, util::Matrix, components::Position};
 use rand::prelude::SliceRandom;
 use rltk::{RGB, RandomNumberGenerator};
 
