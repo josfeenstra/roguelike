@@ -19,14 +19,9 @@ pub enum PushResult {
     Tumble, // we just pushed something down to a lower level
 }
 
-// a space on the map
-pub struct Space {
-    tile: Tile,
-    visible: bool,
-}
-
 pub struct Map {
-    tiles: Matrix<Tile>
+    tiles: Matrix<Tile>,
+    visible: Matrix<bool>
 }
 
 impl Map {
@@ -42,6 +37,7 @@ impl Map {
     pub fn new_random(width: usize, height: usize, num_walls: u32, num_holes: u32) -> Map {
 
         let mut tiles = Matrix::new(width, height, Tile::Floor);
+        let visible = Matrix::new(width, height, false);
     
         let w = width as i32;
         let h = height as i32;
@@ -69,12 +65,13 @@ impl Map {
             tiles.set(x, y, Tile::Abyss);
         }
     
-        Map { tiles }
+        Map { tiles, visible }
     }
 
     pub fn new_empty(width: usize, height: usize, filler: Tile, border: bool) -> Map {
         let mut tiles = Matrix::new(width, height, filler);
-    
+        let visible = Matrix::new(width, height, false);
+
         let w = width as i32;
         let h = height as i32;
         
@@ -89,7 +86,7 @@ impl Map {
             } 
         }
 
-        Map { tiles }
+        Map { tiles, visible }
     }
 
     pub fn new_maze(width: usize, height: usize) -> Map {
@@ -197,11 +194,17 @@ impl Map {
         t == Tile::Floor
     }
 
+    pub fn make_all_invisible(&mut self) {
+        self.visible.fill(false)
+    }
+
     pub fn render(&self, ctx : &mut rltk::Rltk) {
     
         let mut y = 0;
         let mut x = 0;
-        for tile in self.tiles.data.iter() {
+        for (tile, visible) in self.tiles.data.iter().zip(self.visible.data.iter()) {
+            if !visible { continue };
+            
             // Render a tile depending upon the tile type
             match tile {
                 Tile::Floor => {

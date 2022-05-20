@@ -14,6 +14,11 @@ impl Point {
         Self {x, y}
     }
 
+    /// i'm not doing derrive clone, to keep cloning extra explicit
+    pub fn clone(&self) -> Self {
+        Self {x: self.x, y: self.y}
+    }
+
     // computes the angle in radians with respect to the positive x-axis
     pub fn angle(&self) -> f32 {
         f32::atan2(self.y as f32, self.x as f32) + cons::PI

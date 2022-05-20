@@ -2,8 +2,8 @@ use crate::{geo::point::Point, cons, js};
 
 /// represents a circle on the grid
 pub struct Circle {
-    center: Point,
-    radius: f32,
+    pub center: Point,
+    pub radius: f32,
 }
 
 impl Circle {
@@ -12,7 +12,7 @@ impl Circle {
         Circle {center, radius}
     }
 
-    pub fn grid_fill(&self) -> Vec<Point> {
+    pub fn to_grid_fill(&self) -> Vec<Point> {
         let mut fill = Vec::new();
 
         let radius = self.radius;
@@ -35,7 +35,7 @@ impl Circle {
         fill
     }
 
-    pub fn grid_border(&self) -> Vec<Point> {
+    pub fn to_grid_border(&self) -> Vec<Point> {
         let mut border = Vec::new();
 
         let radius = self.radius;
@@ -72,19 +72,14 @@ impl Circle {
     /// NOTE: this is not the cleanest approach
     /// - we first calculate a full circle 
     /// - we do stupid things with the angles, not foolproof
-    pub fn grid_arc(&self, from: f32, to: f32) -> Vec<Point> {
-        let circle = self.grid_border();
-
-        js::print(&format!("angle range {} {}",from, to));
-        
+    pub fn to_grid_arc(&self, from: f32, to: f32) -> Vec<Point> {
+        let circle = self.to_grid_border();
         let arc = circle.into_iter().filter(|p| {
             let angle = p.sub(&self.center).angle();
-            js::print(&format!("angle range {}",angle));
             from < angle && angle <= to || 
             from < angle+cons::TWO_PI && angle+cons::TWO_PI <= to ||
             from < angle-cons::TWO_PI && angle-cons::TWO_PI <= to
         }).collect();
-
         arc
     } 
 }

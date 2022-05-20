@@ -8,6 +8,7 @@ use map::Tile;
 use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
 
+mod systems;
 mod geo;
 mod map;
 mod cons;
@@ -23,6 +24,8 @@ use crate::player::*;
 use geo::Circle;
 use geo::Point;
 use dir::Dir;
+use geo::Line;
+use systems::projectile_system;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -41,19 +44,21 @@ impl GameState for State {
     fn tick(&mut self, ctx : &mut Rltk) {
         ctx.cls();
         player_input(self, ctx);
-        move_projectiles(self);
+        projectile_system(self);
         self.render(ctx);
     }
 }
 impl State {
 
     fn render(&mut self, ctx : &mut Rltk) {
-        let positions = self.ecs.read_storage::<Position>();
-        let renderables = self.ecs.read_storage::<Renderable>();
-        let map = self.ecs.fetch::<Map>();
 
+        let map = self.ecs.fetch::<Map>();
         map.render(ctx);
 
+        // render entities on top
+        let positions = self.ecs.read_storage::<Position>();
+        let renderables = self.ecs.read_storage::<Renderable>();
+
         for (pos, render) in (&positions, &renderables).join() {
             ctx.set(pos.x, pos.y, render.foreground, render.background, render.glyph);
         }
@@ -64,42 +69,7 @@ impl State {
     }
 }
 
-pub fn move_projectiles(state: &mut State) {
 
-    let mut removed : Vec<Entity> = Vec::new();
-    
-    // I live to please the borrow checker
-    {
-        let entities = state.ecs.entities();
-        let mut positions = state.ecs.write_storage::<Position>();
-        let mut projectiles = state.ecs.write_storage::<Projectile>();
-        let mut map = state.ecs.fetch_mut::<Map>();
-
-        for (e, mut pos, mut proj) in (&entities, &mut positions, &mut projectiles).join() {
-            proj.lifetime -= 1;
-            if proj.lifetime < 0 {
-                removed.push(e);
-                continue;
-            }
-            let (dx, dy) = proj.dir.xy();
-            let (nx, ny) = (pos.x + dx, pos.y + dy);
-            
-            let next_tile = map.get_tiles().get(nx, ny).unwrap_or(Tile::Wall);
-            let next_tile_free = next_tile == Tile::Abyss || next_tile == Tile::Floor; 
-            if next_tile_free {
-                pos.x += dx;
-                pos.y += dy;
-            } else {
-                let _res = map.apply_push(nx, ny, proj.dir);
-                removed.push(e);
-            }
-        }
-    }
-
-    for r in removed {
-        state.ecs.delete_entity(r).expect("could not delete entity...");
-    }
-}
 
 fn spawn(ecs: &mut World, x: i32, y: i32, c: char) {
     ecs
@@ -131,10 +101,17 @@ fn drawing_things(ecs: &mut World) {
 
     let circle = Circle::new(Point::new(10, 10), 7.5);
     let dir = Dir::Down;
-    let range = cons::PI * 0.6;
-    for p in circle.grid_arc(dir.rad() - range, dir.rad() + range) {
-        spawn(ecs, p.x, p.y, 'X');
+    let range = cons::PI * 0.49;
+    for p in circle.to_grid_arc(dir.rad() - range, dir.rad() + range) {
+        let line = Line::new(circle.center.clone(), p);
+        for l in line.to_grid() {
+            spawn(ecs, l.x, l.y, 'L');
+        }
+        spawn(ecs, line.to.x, line.to.y, 'A');
     }
+
+
+
 
     // spawn(ecs, 7,6,'█');
     // spawn(ecs, 7,6,'▲');

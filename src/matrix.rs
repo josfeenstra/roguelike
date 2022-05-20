@@ -35,4 +35,8 @@ impl<T: PartialEq + Clone + Copy> Matrix<T> {
     pub fn size(&self) -> usize {
         self.width * self.height
     }
+
+    pub fn fill(&mut self, value: T) {
+        self.data.fill(value);
+    }
 }
