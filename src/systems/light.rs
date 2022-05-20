@@ -1,8 +1,8 @@
-use crate::{State, components::{Position}, map::{Map, Tile}, player::Player};
+use crate::{components::{Position, Player}, map::{Map, Tile}, state::MyState};
 use specs::Entity;
 use specs::prelude::*;
 
-pub fn light_system(state: &mut State) {
+pub fn light_system(state: &mut MyState) {
 
     let mut positions = state.ecs.read_storage::<Position>();
     let mut players = state.ecs.read_storage::<Player>();
@@ -12,6 +12,15 @@ pub fn light_system(state: &mut State) {
     map.make_all_invisible();
 
     for (pos, player) in (&positions, &players).join() {
+        
+        // for p in circle.to_grid_arc(dir.rad() - range, dir.rad() + range) {
+        //     let line = Line::new(circle.center.clone(), p);
+        //     for l in line.to_grid() {
+        //         map.
+        //     }
+        //     spawn(ecs, line.to.x, line.to.y, 'A');
+        // }
+
         // 1 build arc
         // 2 build lines between arc 
         // 3 make all those points visible

@@ -1,9 +1,12 @@
 use std::cmp::{min, max};
 
-use crate::{dir::{Dir}, components::{Position, Renderable, Projectile}, map::{Map}, State, cons};
 use rltk::{Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
+
+use crate::{util::Dir, map::Map, cons, state::MyState};
+
+use super::{Position, Renderable, Projectile};
 
 #[derive(Component, Debug)]
 pub struct Player {
@@ -80,7 +83,7 @@ fn try_player_shoot(ecs: &mut World) {
         .build();
 }
 
-pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
+pub fn player_input(gs: &mut MyState, ctx: &mut Rltk) {
     
     // Player movement
     match ctx.key {

@@ -1,31 +1,33 @@
 #![allow(dead_code)]
 
+use components::Position;
+use components::Renderable;
 /**
  * main contains main, but also all non-refactored stuff 
  */
 
-use map::Tile;
-use rltk::{GameState, Rltk, RGB};
+use rltk::{Rltk, RGB};
 use specs::prelude::*;
 
-mod systems;
 mod geo;
 mod map;
 mod cons;
-mod dir;
-mod components;
-mod player;
-mod matrix;
-mod js;
+mod util;
 
-use crate::map::*;
-use crate::components::*;
-use crate::player::*;
+mod systems;
+mod components;
+mod state;
+
 use geo::Circle;
 use geo::Point;
-use dir::Dir;
 use geo::Line;
 use systems::projectile_system;
+use util::Dir;
+
+use crate::components::Player;
+use crate::components::Projectile;
+use crate::map::Map;
+use crate::state::MyState;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -35,40 +37,6 @@ fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 5, "  Options");
     ctx.print(4, cons::HH + 6, "  Quit");
 }
-pub struct State {
-    ecs: World,
-}
-
-impl GameState for State {
-
-    fn tick(&mut self, ctx : &mut Rltk) {
-        ctx.cls();
-        player_input(self, ctx);
-        projectile_system(self);
-        self.render(ctx);
-    }
-}
-impl State {
-
-    fn render(&mut self, ctx : &mut Rltk) {
-
-        let map = self.ecs.fetch::<Map>();
-        map.render(ctx);
-
-        // render entities on top
-        let positions = self.ecs.read_storage::<Position>();
-        let renderables = self.ecs.read_storage::<Renderable>();
-
-        for (pos, render) in (&positions, &renderables).join() {
-            ctx.set(pos.x, pos.y, render.foreground, render.background, render.glyph);
-        }
-    
-        for (pos, render) in (&positions, &renderables).join() {
-            ctx.set(pos.x, pos.y, render.foreground, render.background, render.glyph);
-        }
-    }
-}
-
 
 
 fn spawn(ecs: &mut World, x: i32, y: i32, c: char) {
@@ -110,9 +78,6 @@ fn drawing_things(ecs: &mut World) {
         spawn(ecs, line.to.x, line.to.y, 'A');
     }
 
-
-
-
     // spawn(ecs, 7,6,'█');
     // spawn(ecs, 7,6,'▲');
     // spawn(ecs, 8,7,'►');
@@ -140,7 +105,7 @@ fn drawing_things(ecs: &mut World) {
 
 fn main() -> rltk::BError {
 
-    let mut gs = State {
+    let mut gs = MyState {
         ecs: World::new()
     };
 

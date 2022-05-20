@@ -1,6 +1,6 @@
+use crate::util;
+
 use super::Point;
-use std::cmp::Ordering;
-use crate::js;
 
 pub struct Line {
     pub from: Point,
@@ -44,7 +44,7 @@ impl Line {
             }
             cover.push(cursor.clone());
         };
-        js::print(&format!("length: {}", cover.len()));
+        util::print(&format!("length: {}", cover.len()));
         cover
     }
 

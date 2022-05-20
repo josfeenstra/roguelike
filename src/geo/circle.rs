@@ -1,4 +1,4 @@
-use crate::{geo::point::Point, cons, js};
+use crate::{geo::point::Point, cons};
 
 /// represents a circle on the grid
 pub struct Circle {

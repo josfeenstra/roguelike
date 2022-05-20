@@ -1,6 +1,6 @@
 use std::{borrow::{Borrow, BorrowMut}};
 
-use crate::{cons, dir::{Dir}, matrix::Matrix, components::Position, js};
+use crate::{cons, util::{Dir, self}, util::Matrix, components::Position, util::print};
 use rand::prelude::SliceRandom;
 use rltk::{RGB, RandomNumberGenerator};
 
@@ -178,7 +178,7 @@ impl Map {
             }
         }
 
-        js::print(&format!("{}", to_even(5)));
+        util::print(&format!("{}", to_even(5)));
 
         // let them run wild for a couple of iterations
         // for _ in 0..1000 {

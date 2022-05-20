@@ -1,8 +1,8 @@
-use crate::{State, components::{Position, Projectile}, map::{Map, Tile}};
+use crate::{MyState, components::{Position, Projectile}, map::{Map, Tile}};
 use specs::Entity;
 use specs::prelude::*;
 
-pub fn projectile_system(state: &mut State) {
+pub fn projectile_system(state: &mut MyState) {
 
     let mut removed : Vec<Entity> = Vec::new();
     
