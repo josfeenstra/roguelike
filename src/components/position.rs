@@ -1,6 +1,7 @@
 use specs::prelude::*;
 use specs_derive::Component;
 
+// NOTE: its completely stupid why this is not a Point
 #[derive(Component)]
 pub struct Position {
     pub x: i32,

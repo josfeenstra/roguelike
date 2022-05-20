@@ -66,16 +66,16 @@ fn drawing_things(ecs: &mut World) {
     //     .build();
     // }
 
-    let circle = Circle::new(Point::new(10, 10), 7.5);
-    let dir = Dir::Down;
-    let range = cons::PI * 0.49;
-    for p in circle.to_grid_arc(dir.rad() - range, dir.rad() + range) {
-        let line = Line::new(circle.center.clone(), p);
-        for l in line.to_grid() {
-            spawn(ecs, l.x, l.y, 'L');
-        }
-        spawn(ecs, line.to.x, line.to.y, 'A');
-    }
+    // let circle = Circle::new(Point::new(10, 10), 7.5);
+    // let dir = Dir::Down;
+    // let range = cons::PI * 0.49;
+    // for p in circle.to_grid_arc(dir.rad() - range, dir.rad() + range) {
+    //     let line = Line::new(circle.center.clone(), p);
+    //     for l in line.to_grid() {
+    //         spawn(ecs, l.x, l.y, 'L');
+    //     }
+    //     spawn(ecs, line.to.x, line.to.y, 'A');
+    // }
 
     // spawn(ecs, 7,6,'█');
     // spawn(ecs, 7,6,'▲');

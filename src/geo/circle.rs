@@ -35,7 +35,7 @@ impl Circle {
         fill
     }
 
-    pub fn to_grid_border(&self) -> Vec<Point> {
+    pub fn to_grid_edge(&self) -> Vec<Point> {
         let mut border = Vec::new();
 
         let radius = self.radius;
@@ -73,7 +73,7 @@ impl Circle {
     /// - we first calculate a full circle 
     /// - we do stupid things with the angles, not foolproof
     pub fn to_grid_arc(&self, from: f32, to: f32) -> Vec<Point> {
-        let circle = self.to_grid_border();
+        let circle = self.to_grid_edge();
         let arc = circle.into_iter().filter(|p| {
             let angle = p.sub(&self.center).angle();
             from < angle && angle <= to || 

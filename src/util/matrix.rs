@@ -12,6 +12,9 @@ impl<T: PartialEq + Clone + Copy> Matrix<T> {
     }
 
     pub fn set(&mut self, x: i32, y: i32, value: T) -> usize {
+        if x < 0 || x >= self.width as i32 || y < 0 || y >= self.height as i32 {
+            return 0;
+        }
         let id = self.to_index(x, y);
         self.data[id] = value;
         id

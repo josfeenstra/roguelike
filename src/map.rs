@@ -1,8 +1,8 @@
 use std::{borrow::{Borrow, BorrowMut}};
 
-use crate::{cons, util::{Dir, self}, util::Matrix, components::Position};
+use crate::{cons, util::{Dir, self}, util::Matrix, components::Position, geo::Point};
 use rand::prelude::SliceRandom;
-use rltk::{RGB, RandomNumberGenerator};
+use rltk::{RGB, RandomNumberGenerator, BLACK};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Tile {
@@ -21,7 +21,7 @@ pub enum PushResult {
 
 pub struct Map {
     tiles: Matrix<Tile>,
-    visible: Matrix<bool>
+    pub light: Matrix<f32>
 }
 
 impl Map {
@@ -37,7 +37,7 @@ impl Map {
     pub fn new_random(width: usize, height: usize, num_walls: u32, num_holes: u32) -> Map {
 
         let mut tiles = Matrix::new(width, height, Tile::Floor);
-        let visible = Matrix::new(width, height, false);
+        let visible = Matrix::new(width, height, 0.0);
     
         let w = width as i32;
         let h = height as i32;
@@ -65,12 +65,12 @@ impl Map {
             tiles.set(x, y, Tile::Abyss);
         }
     
-        Map { tiles, visible }
+        Map { tiles, light: visible }
     }
 
     pub fn new_empty(width: usize, height: usize, filler: Tile, border: bool) -> Map {
         let mut tiles = Matrix::new(width, height, filler);
-        let visible = Matrix::new(width, height, false);
+        let visible = Matrix::new(width, height, 0.0);
 
         let w = width as i32;
         let h = height as i32;
@@ -86,9 +86,10 @@ impl Map {
             } 
         }
 
-        Map { tiles, visible }
+        Map { tiles, light: visible }
     }
 
+    /// a elaborate procedure to just create a nice, maze like map.
     pub fn new_maze(width: usize, height: usize) -> Map {
         
         fn to_even(n: i32) -> i32 {
@@ -194,52 +195,8 @@ impl Map {
         t == Tile::Floor
     }
 
-    pub fn make_all_invisible(&mut self) {
-        self.visible.fill(false)
-    }
-
-    pub fn render(&self, ctx : &mut rltk::Rltk) {
-    
-        let mut y = 0;
-        let mut x = 0;
-        for (tile, visible) in self.tiles.data.iter().zip(self.visible.data.iter()) {
-            if !visible { continue };
-            
-            // Render a tile depending upon the tile type
-            match tile {
-                Tile::Floor => {
-                    ctx.set(x, y, 
-                        cons::RGB_BACKGROUND, 
-                        cons::RGB_BACKGROUND, 
-                        rltk::to_cp437('#')); // •
-                }
-                Tile::Wall => {
-                    let char = getwall(
-                        self.tiles.get(x, y-1).unwrap_or(Tile::Floor),
-                        self.tiles.get(x-1, y).unwrap_or(Tile::Floor),
-                        self.tiles.get(x, y+1).unwrap_or(Tile::Floor),
-                        self.tiles.get(x+1, y).unwrap_or(Tile::Floor),
-                    );
-                    ctx.set(x, y, 
-                        RGB::from_u8(140, 140, 160), 
-                        cons::RGB_BACKGROUND, 
-                        rltk::to_cp437(char));
-                }
-                Tile::Abyss => {
-                    ctx.set(x, y, 
-                        cons::RGB_BACKGROUND, 
-                        RGB::from_u8(0, 0, 0), 
-                        rltk::to_cp437(' ')); //α
-                }
-            }
-    
-            // Move the coordinates
-            x += 1;
-            if x > self.tiles.width as i32 - 1 {
-                x = 0;
-                y += 1;
-            }
-        }
+    pub fn darken_all(&mut self) {
+        self.light.fill(0.0)
     }
 
     pub fn apply_push(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
@@ -267,6 +224,58 @@ impl Map {
     
         // next tile is free!
         return PushResult::Free;
+    }
+
+
+    pub fn render(&self, ctx : &mut rltk::Rltk, offset: Point) {
+        
+        // implement offset!
+
+        let mut y = 0;
+        let mut x = 0;
+
+        let black: RGB = RGB::from_u8(0, 0, 0);
+
+        for (tile, light) in self.tiles.data.iter().zip(self.light.data.iter()) {
+            
+            // Render a tile depending upon the tile type
+            if *light > 0.0 { 
+                match tile {
+                    Tile::Floor => {
+                        ctx.set(x, y, 
+                            cons::RGB_BACKGROUND, 
+                            RGB::lerp(&black, cons::RGB_BACKGROUND, *light), 
+                            rltk::to_cp437(' ')); // •
+                    }
+                    Tile::Wall => {
+                        let char = getwall(
+                            self.tiles.get(x, y-1).unwrap_or(Tile::Floor),
+                            self.tiles.get(x-1, y).unwrap_or(Tile::Floor),
+                            self.tiles.get(x, y+1).unwrap_or(Tile::Floor),
+                            self.tiles.get(x+1, y).unwrap_or(Tile::Floor),
+                        );
+                        ctx.set(x, y, 
+                            RGB::lerp(&black, RGB::from_u8(140, 140, 160), *light), 
+                            RGB::lerp(&black, cons::RGB_BACKGROUND, *light), 
+                            rltk::to_cp437(char));
+                    }
+                    Tile::Abyss => {
+                        ctx.set(x, y, 
+                            cons::RGB_BACKGROUND, 
+                            black.clone(), 
+                            rltk::to_cp437(' ')); //α
+                    }
+                }
+            };
+
+    
+            // Move the coordinates
+            x += 1;
+            if x > self.tiles.width as i32 - 1 {
+                x = 0;
+                y += 1;
+            }
+        }
     }
 }        
 

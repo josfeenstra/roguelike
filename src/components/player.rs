@@ -10,7 +10,7 @@ use super::{Position, Renderable, Projectile};
 
 #[derive(Component, Debug)]
 pub struct Player {
-    dir: Dir,
+    pub dir: Dir,
 }
 
 impl Player {
