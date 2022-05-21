@@ -1,21 +1,22 @@
-use crate::{components::{Position, Player}, map::{Map}, state::MyState, geo::{Circle, Point, Line}, cons, util};
+use crate::{components::{Position, Player}, map::{Map}, state::MyState, geo::{Circle, Point, Line}, cons};
 use specs::prelude::*;
 
 pub fn light_system(state: &mut MyState) {
 
-    const radius: f32 = 9.5;
-    let dropoff = 0.5;
+    const RADIUS: f32 = 9.5;
 
     let positions = state.ecs.read_storage::<Position>();
     let players = state.ecs.read_storage::<Player>();
 
     let mut map = state.ecs.fetch_mut::<Map>();
 
-    map.darken_all();
+    // map.light.fill(0.5);
 
+    // its possible to do this way easier
     for (pos, _player) in (&positions, &players).join() {
         
-        let c = Circle::new(Point::new(pos.x, pos.y), radius);
+        let c = Circle::new(Point::new(pos.x, pos.y), RADIUS);
+        // let points = c.to_grid_arc(_player.dir.rad() - cons::HALF_PI* 0.5, _player.dir.rad() + cons::HALF_PI * 0.5);
         let points = c.to_grid_edge();
         for p in points {
             let line = Line::new(c.center.clone(), p);
@@ -29,7 +30,7 @@ pub fn light_system(state: &mut MyState) {
                 //     f = 1.0 - (scale-dropoff) * (1.0 / dropoff); 
                 // }
                 map.light.set(l.x, l.y, f);
-                // if !map.is_free(l.x, l.y) { scale += 0.5 };
+                // if !map.is_free(l.x, l.y) { break; };
             }
             // map.light.set(line.to.x, line.to.y, 0.2);
         }

@@ -44,7 +44,7 @@ impl Line {
             }
             cover.push(cursor.clone());
         };
-        util::print(&format!("length: {}", cover.len()));
+        // util::print(&format!("length: {}", cover.len()));
         cover
     }
 

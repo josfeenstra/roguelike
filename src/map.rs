@@ -2,7 +2,7 @@ use std::{borrow::{Borrow, BorrowMut}};
 
 use crate::{cons, util::{Dir, self}, util::Matrix, components::Position, geo::Point};
 use rand::prelude::SliceRandom;
-use rltk::{RGB, RandomNumberGenerator, BLACK, RGBA, FontCharType};
+use rltk::{RGB, RandomNumberGenerator, BLACK, RGBA, FontCharType, console};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Tile {
@@ -179,8 +179,7 @@ impl Map {
             }
         }
 
-        util::print(&format!("{}", to_even(5)));
-
+        console::log(&format!("{}", to_even(5)));
         // let them run wild for a couple of iterations
         // for _ in 0..1000 {
         //     num_agents
@@ -249,7 +248,7 @@ impl Map {
                             self.tiles.get(x, y+1).unwrap_or(Tile::Floor),
                             self.tiles.get(x+1, y).unwrap_or(Tile::Floor),
                         );
-                        (RGB::from_u8(140, 140, 50), cons::RGB_BACKGROUND, rltk::to_cp437(char))
+                        (RGB::from_u8(100, 100, 200), cons::RGB_BACKGROUND, rltk::to_cp437(char))
                     }    
                 };
 

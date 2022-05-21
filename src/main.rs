@@ -128,6 +128,7 @@ fn main() -> rltk::BError {
         .build();
 
     // render the world
+    // let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 400, 0);
     let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT);
     gs.ecs.insert(maze);
 

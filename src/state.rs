@@ -44,10 +44,9 @@ impl MyState {
         for (pos, _player) in (&positions, &players).join() {
             cam.offset.addn(-pos.x, -pos.y);
         }
-       
+        
         map.render(ctx, &cam.offset);
-
-
+        
         for (pos, render) in (&positions, &renderables).join() {
             ctx.set(pos.x + cam.offset.x, pos.y + cam.offset.y, render.foreground, render.background, render.glyph);
         }
