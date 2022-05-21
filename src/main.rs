@@ -23,6 +23,7 @@ use geo::Point;
 use geo::Line;
 use util::Dir;
 
+use crate::components::Camera;
 use crate::components::Player;
 use crate::components::Projectile;
 use crate::map::Map;
@@ -129,6 +130,9 @@ fn main() -> rltk::BError {
     // render the world
     let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT);
     gs.ecs.insert(maze);
+
+    let camera = Camera { offset: Point::new(0,0) };
+    gs.ecs.insert(camera);
 
     use rltk::RltkBuilder;
     let context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT)

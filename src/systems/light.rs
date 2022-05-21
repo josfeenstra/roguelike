@@ -3,7 +3,7 @@ use specs::prelude::*;
 
 pub fn light_system(state: &mut MyState) {
 
-    const radius: f32 = 7.5;
+    const radius: f32 = 9.5;
     let dropoff = 0.5;
 
     let positions = state.ecs.read_storage::<Position>();

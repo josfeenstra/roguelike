@@ -2,7 +2,7 @@ use std::{borrow::{Borrow, BorrowMut}};
 
 use crate::{cons, util::{Dir, self}, util::Matrix, components::Position, geo::Point};
 use rand::prelude::SliceRandom;
-use rltk::{RGB, RandomNumberGenerator, BLACK};
+use rltk::{RGB, RandomNumberGenerator, BLACK, RGBA, FontCharType};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Tile {
@@ -227,26 +227,21 @@ impl Map {
     }
 
 
-    pub fn render(&self, ctx : &mut rltk::Rltk, offset: Point) {
+    pub fn render(&self, ctx : &mut rltk::Rltk, offset: &Point) {
         
         // implement offset!
-
+        let black: RGB = RGB::from_u8(0, 0, 0);
         let mut y = 0;
         let mut x = 0;
-
-        let black: RGB = RGB::from_u8(0, 0, 0);
 
         for (tile, light) in self.tiles.data.iter().zip(self.light.data.iter()) {
             
             // Render a tile depending upon the tile type
             if *light > 0.0 { 
-                match tile {
-                    Tile::Floor => {
-                        ctx.set(x, y, 
-                            cons::RGB_BACKGROUND, 
-                            RGB::lerp(&black, cons::RGB_BACKGROUND, *light), 
-                            rltk::to_cp437(' ')); // •
-                    }
+
+                let (fg, bg, glyph) = match tile {
+                    Tile::Floor => (cons::RGB_BACKGROUND, cons::RGB_BACKGROUND, rltk::to_cp437(' ')),
+                    Tile::Abyss => (cons::RGB_BACKGROUND, black.clone(), rltk::to_cp437(' ')),
                     Tile::Wall => {
                         let char = getwall(
                             self.tiles.get(x, y-1).unwrap_or(Tile::Floor),
@@ -254,18 +249,16 @@ impl Map {
                             self.tiles.get(x, y+1).unwrap_or(Tile::Floor),
                             self.tiles.get(x+1, y).unwrap_or(Tile::Floor),
                         );
-                        ctx.set(x, y, 
-                            RGB::lerp(&black, RGB::from_u8(140, 140, 160), *light), 
-                            RGB::lerp(&black, cons::RGB_BACKGROUND, *light), 
-                            rltk::to_cp437(char));
-                    }
-                    Tile::Abyss => {
-                        ctx.set(x, y, 
-                            cons::RGB_BACKGROUND, 
-                            black.clone(), 
-                            rltk::to_cp437(' ')); //α
-                    }
-                }
+                        (RGB::from_u8(140, 140, 50), cons::RGB_BACKGROUND, rltk::to_cp437(char))
+                    }    
+                };
+
+                ctx.set(x + offset.x * 1, 
+                    y + offset.y * 1, 
+                    RGB::lerp(&black, fg, *light), 
+                    RGB::lerp(&black, bg, *light), 
+                    glyph);
+
             };
 
     

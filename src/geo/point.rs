@@ -28,6 +28,11 @@ impl Point {
         self.y = y;
     }
 
+    pub fn addn(&mut self, x: i32, y: i32) {
+        self.x += x;
+        self.y += y;
+    }
+
     // computes the angle in radians with respect to the positive x-axis
     pub fn angle(&self) -> f32 {
         f32::atan2(self.y as f32, self.x as f32) + cons::PI
