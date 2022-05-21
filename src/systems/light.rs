@@ -1,4 +1,4 @@
-use crate::{components::{Position, Player}, map::{Map}, state::MyState, geo::{Circle, Point, Line}, cons};
+use crate::{components::{Position, Player}, map::{Map}, state::MyState, geo::{Circle, Point, Line}};
 use specs::prelude::*;
 
 pub fn light_system(state: &mut MyState) {

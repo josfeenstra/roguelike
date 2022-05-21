@@ -1,0 +1,1 @@
+// TODO allow things to light up the map

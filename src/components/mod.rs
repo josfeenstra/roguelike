@@ -4,7 +4,9 @@ mod position;
 mod renderable;
 mod projectile;
 mod camera;
+mod monster;
 
+pub use monster::*;
 pub use light::*;
 pub use player::*;
 pub use position::*;

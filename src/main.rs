@@ -24,6 +24,7 @@ use geo::Line;
 use util::Dir;
 
 use crate::components::Camera;
+use crate::components::Monster;
 use crate::components::Player;
 use crate::components::Projectile;
 use crate::map::Map;
@@ -50,7 +51,7 @@ fn spawn(ecs: &mut World, x: i32, y: i32, c: char) {
     .build();
 }
 
-fn drawing_things(ecs: &mut World) {
+fn drawing_things(_ecs: &mut World) {
 
     // for i in 0..256 {
 
@@ -113,6 +114,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
+    gs.ecs.register::<Monster>();
 
     drawing_things(&mut gs.ecs);
 
@@ -125,6 +127,16 @@ fn main() -> rltk::BError {
             RGB::named((255,0,0)), 
             cons::RGB_BACKGROUND))
         .with(Player::new())
+        .build();
+
+    gs.ecs
+        .create_entity()
+        .with(Position::new(21, 19))
+        .with(Renderable::new(
+            rltk::to_cp437('K'), 
+            RGB::named((0,255,0)), 
+            cons::RGB_BACKGROUND))
+        .with(Monster{})
         .build();
 
     // render the world

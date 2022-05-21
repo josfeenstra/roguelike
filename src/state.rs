@@ -8,6 +8,7 @@ use crate::components::Position;
 use crate::components::Renderable;
 use crate::cons;
 use crate::geo::Point;
+use crate::systems::MonsterAI;
 use crate::{components::player_input, systems::{projectile_system, light_system}, map::Map};
 
 
@@ -20,13 +21,25 @@ impl GameState for MyState {
 
     fn tick(&mut self, ctx : &mut Rltk) {
         ctx.cls();
-        player_input(self, ctx);
-        projectile_system(self);
-        light_system(self);
+        self.run_systems(ctx);
         self.render(ctx);
     }
 }
 impl MyState {
+
+    fn init() {
+           
+    }
+
+    fn run_systems(&mut self, ctx : &mut Rltk) {
+        player_input(self, ctx);
+        projectile_system(self);
+        light_system(self);
+
+        let mut mob = MonsterAI{};
+        mob.run_now(&self.ecs);
+        self.ecs.maintain();
+    }
 
     fn render(&mut self, ctx : &mut Rltk) {
 
