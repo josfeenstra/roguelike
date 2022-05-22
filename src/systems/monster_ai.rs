@@ -11,7 +11,7 @@ impl<'a> System<'a> for MonsterAI {
 
     fn run(&mut self, data : Self::SystemData) {
         let (pos, monster) = data;
-
+        
         for (pos,_monster) in (&pos, &monster).join() {
             // console::log("Monster considers their own existence");
         }
