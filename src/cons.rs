@@ -1,7 +1,6 @@
-/**
- * Constances
- */
 use rltk::RGB;
+
+pub const TITLE: &str = "Dungeoneer";
 
 pub const WIDTH: usize = 23; // 33
 pub const HEIGHT: usize = 23; // 41

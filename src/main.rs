@@ -43,7 +43,6 @@ fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 6, "  Quit");
 }
 
-
 fn spawn(ecs: &mut World, x: i32, y: i32, c: char) {
     ecs
     .create_entity()
@@ -151,7 +150,7 @@ fn main() -> rltk::BError {
     use rltk::RltkBuilder;
     let context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT)
         .unwrap()
-        .with_title("Roguelike")
+        .with_title(cons::TITLE)
         .build()?;
         
     // context.with_post_scanlines(true);
