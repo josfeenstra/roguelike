@@ -3,8 +3,8 @@
  */
 use rltk::RGB;
 
-pub const WIDTH: usize = 33; // 33
-pub const HEIGHT: usize = 41; // 41
+pub const WIDTH: usize = 23; // 33
+pub const HEIGHT: usize = 23; // 41
 pub const HW: usize = WIDTH / 2;
 pub const HH: usize = HEIGHT / 2;
 

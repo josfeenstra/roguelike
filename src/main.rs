@@ -145,6 +145,7 @@ fn main() -> rltk::BError {
     // create other resources
     gs.ecs.insert(Camera { offset: Point::new(0,0) });
     gs.ecs.insert(PlayerPos { pos: Point::new(0,0) });
+    gs.ecs.insert(rltk::RandomNumberGenerator::new());
 
     // spawn the window
     use rltk::RltkBuilder;

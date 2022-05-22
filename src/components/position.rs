@@ -17,6 +17,6 @@ impl Position {
     }
 
     pub fn to_point(&self) -> Point {
-        Point {y: self.x, x: self.y}
+        Point {x: self.x, y: self.y}
     }
 }

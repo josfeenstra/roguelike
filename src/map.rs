@@ -173,7 +173,7 @@ impl Map {
         }
 
         let openness = 50; // number between 0 and 100, with 0 being very claustrofobic, and 100 being almost not a maze anymore
-        let num_agents = 100;
+        let num_agents = 40;
         let num_iterations = 6;
 
         // create the area filled with walls
