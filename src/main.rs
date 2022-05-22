@@ -9,6 +9,7 @@ use components::Renderable;
 use rltk::{Rltk, RGB};
 use specs::prelude::*;
 
+mod resources;
 mod geo;
 mod map;
 mod cons;
@@ -23,12 +24,13 @@ use geo::Point;
 use geo::Line;
 use util::Dir;
 
-use crate::components::Camera;
 use crate::components::Direction;
 use crate::components::Monster;
 use crate::components::Player;
 use crate::components::Projectile;
 use crate::map::Map;
+use crate::resources::Camera;
+use crate::resources::PlayerPos;
 use crate::state::MyState;
 use crate::systems::spawn_monsters;
 
@@ -106,23 +108,10 @@ fn drawing_things(ecs: &mut World) {
 /////////////////////////////////////////////////////////////////
 
 
-fn main() -> rltk::BError {
-
-    let mut gs = MyState::new();
-
-    gs.ecs.register::<Position>();
-    gs.ecs.register::<Direction>();
-    gs.ecs.register::<Renderable>();
-    gs.ecs.register::<Player>();
-    gs.ecs.register::<Projectile>();
-    gs.ecs.register::<Monster>();
-
-    // drawing_things(&mut gs.ecs);
-
-    // create the player
-    gs.ecs
+fn make_player(ecs: &mut World) {
+    ecs
         .create_entity()
-        .with(Position::new(17, 17))
+        .with(Position::new(3, 3))
         .with(Renderable::new(
             rltk::to_cp437('►'), 
             RGB::named(rltk::YELLOW), 
@@ -130,16 +119,34 @@ fn main() -> rltk::BError {
         .with(Player {})
         .with(Direction { dir: Dir::Down})
         .build();
+}
 
-    // render the world
-    // let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 400, 0);
+fn main() -> rltk::BError {
+
+    // init the state
+    let mut gs = MyState::new();
+
+    // register all used components
+    gs.ecs.register::<Position>();
+    gs.ecs.register::<Direction>();
+    gs.ecs.register::<Renderable>();
+    gs.ecs.register::<Player>();
+    gs.ecs.register::<Projectile>();
+    gs.ecs.register::<Monster>();
+
+    // create the player
+    make_player(&mut gs.ecs);
+
+    // create the map resource
     let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT);
     spawn_monsters(&mut gs, &maze, 5);
     gs.ecs.insert(maze);
 
-    let camera = Camera { offset: Point::new(0,0) };
-    gs.ecs.insert(camera);
+    // create other resources
+    gs.ecs.insert(Camera { offset: Point::new(0,0) });
+    gs.ecs.insert(PlayerPos { pos: Point::new(0,0) });
 
+    // spawn the window
     use rltk::RltkBuilder;
     let context = RltkBuilder::simple(cons::WIDTH, cons::HEIGHT)
         .unwrap()
@@ -147,6 +154,5 @@ fn main() -> rltk::BError {
         .build()?;
         
     // context.with_post_scanlines(true);
-
     rltk::main_loop(context, gs)
 }

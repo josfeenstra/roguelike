@@ -1,8 +1,8 @@
 use specs::prelude::*;
 use specs_derive::Component;
-use crate::cons;
+use crate::{cons, util::Dir};
 
-#[derive(Component)]
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Point {
     pub x: i32,
     pub y: i32,

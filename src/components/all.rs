@@ -33,11 +33,3 @@ pub struct Projectile {
     pub dir: Dir,
     pub lifetime: i32,
 }
-
-
-
-// global storage things
-
-pub struct Camera {
-    pub offset: Point,
-}

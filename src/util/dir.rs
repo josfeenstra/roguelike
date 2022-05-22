@@ -8,7 +8,7 @@ use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-use crate::cons; // 0.8.0
+use crate::{cons, geo::Point}; // 0.8.0
 
 #[derive(Component, Debug, Copy, Clone, PartialEq)]
 pub enum Dir {
@@ -50,10 +50,19 @@ impl Dir {
 
     pub fn xy(&self) -> (i32, i32) {
         match self {
-            Dir::Left => (-1, 0),
+            Dir::Left =>  (-1, 0),
             Dir::Right => (1, 0),
-            Dir::Up => (0, -1),
-            Dir::Down => (0, 1),
+            Dir::Up =>    (0, -1),
+            Dir::Down =>  (0, 1),
+        }
+    }
+
+    pub fn vector(&self) -> Point {
+        match self {
+            Dir::Left =>  Point {x: -1 , y: 0},
+            Dir::Right => Point {x: 1  , y: 0},
+            Dir::Up =>    Point {x: 0  , y: -1},
+            Dir::Down =>  Point {x: 0  , y: 1},
         }
     }
 

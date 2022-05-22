@@ -12,8 +12,8 @@ pub fn spawn_monsters(state: &mut MyState, map: &Map, count: u32) {
         let glyph : rltk::FontCharType;
         let roll = rng.roll_dice(1, 2);
         match roll {
-            1 => { glyph = rltk::to_cp437('<') }
-            _ => { glyph = rltk::to_cp437('>') }
+            1 => { glyph = rltk::to_cp437('X') }
+            _ => { glyph = rltk::to_cp437('X') }
         }
 
         state.ecs.create_entity()

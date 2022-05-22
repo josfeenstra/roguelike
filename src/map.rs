@@ -44,6 +44,10 @@ impl Map {
         Some(self.tiles[id])
     }
 
+    pub fn get_tile_at(&self, point: Point) -> Option<Tile> {
+        self.get_tile(point.x, point.y)
+    }
+
     pub fn set_light(&mut self, x: i32, y: i32, light: f32) -> Option<usize> {
         let id = self.to_index(x, y)?;
         self.light[id] = light;
@@ -232,6 +236,10 @@ impl Map {
     pub fn is_free(&self, x: i32, y: i32) -> bool {
         let t = self.get_tile(x, y).unwrap_or(Tile::Wall);
         t == Tile::Floor
+    }
+
+    pub fn is_free_at(&self, point: Point) -> bool {
+        return self.is_free(point.x, point.y)
     }
 
     pub fn darken_all(&mut self) {

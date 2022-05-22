@@ -3,12 +3,12 @@ use rltk::{GameState, Rltk};
 use specs::World;
 use specs::prelude::*;
 
-use crate::components::Camera;
 use crate::components::Player;
 use crate::components::Position;
 use crate::components::Renderable;
 use crate::cons;
 use crate::geo::Point;
+use crate::resources::{Camera, PlayerPos};
 use crate::systems::{MonsterAI, player_input};
 use crate::{systems::{projectile_system, light_system}, map::Map};
 
@@ -27,9 +27,11 @@ impl GameState for MyState {
         // logic 
         if self.runstate == RunState::Running {
             self.run_systems(ctx);
+            self.update_resources();
             self.runstate = RunState::Paused;
         } else {
             self.runstate = player_input(self, ctx);
+            self.update_resources();
         }
         
         // render 
@@ -44,6 +46,21 @@ impl MyState {
             ecs: World::new(),
             runstate: RunState::Running,
         }   
+    }
+
+    fn update_resources(&mut self) {
+        let players = self.ecs.read_storage::<Player>();
+        let positions = self.ecs.read_storage::<Position>();
+
+        let mut cam = self.ecs.fetch_mut::<Camera>();
+        let mut player_pos = self.ecs.fetch_mut::<PlayerPos>();
+
+        cam.offset = Point::new(cons::WIDTH as i32 / 2,cons::HEIGHT as i32 / 2);
+
+        for (pos, player) in (&positions, &players).join() {
+            player_pos.pos.set(pos.x, pos.y);
+            cam.offset.addn(-pos.x, -pos.y);
+        }
     }
 
     fn run_systems(&mut self, ctx : &mut Rltk) {
@@ -62,15 +79,7 @@ impl MyState {
         let renderables = self.ecs.read_storage::<Renderable>();
 
         let map = self.ecs.fetch::<Map>();
-        let mut cam = self.ecs.fetch_mut::<Camera>();
-
-        // TODO abstract away camera system
-        // create the 'camera', which is always just an offset
-        // cam.offset = Point::new(0, 0);
-        cam.offset = Point::new(cons::WIDTH as i32 / 2,cons::HEIGHT as i32 / 2);
-        for (pos, _player) in (&positions, &players).join() {
-            cam.offset.addn(-pos.x, -pos.y);
-        }
+        let cam = self.ecs.fetch::<Camera>();
         
         map.render(ctx, &cam.offset);
         
