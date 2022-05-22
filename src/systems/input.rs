@@ -46,7 +46,7 @@ fn get_player( ecs: &mut specs::World) -> (Position, Dir) {
 
     let mut position = Position::new(0,0);
     let mut direction = Dir::Left;
-    for (player, pos, dir) in (&mut players, &mut positions, &mut directions).join() {
+    for (_player, pos, dir) in (&mut players, &mut positions, &mut directions).join() {
         position.x = pos.x;
         position.y = pos.y;
         direction = dir.dir.clone();
