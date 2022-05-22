@@ -1,3 +1,4 @@
+use rltk::RGB;
 use rltk::{GameState, Rltk};
 use specs::World;
 use specs::prelude::*;
@@ -8,31 +9,44 @@ use crate::components::Position;
 use crate::components::Renderable;
 use crate::cons;
 use crate::geo::Point;
-use crate::systems::MonsterAI;
-use crate::{components::player_input, systems::{projectile_system, light_system}, map::Map};
+use crate::systems::{MonsterAI, player_input};
+use crate::{systems::{projectile_system, light_system}, map::Map};
 
-
+#[derive(PartialEq, Copy, Clone)]
+pub enum RunState { Paused, Running }
 
 pub struct MyState {
     pub ecs: World,
+    pub runstate : RunState
 }
 
 impl GameState for MyState {
 
     fn tick(&mut self, ctx : &mut Rltk) {
+        
+        // logic 
+        if self.runstate == RunState::Running {
+            self.run_systems(ctx);
+            self.runstate = RunState::Paused;
+        } else {
+            self.runstate = player_input(self, ctx);
+        }
+        
+        // render 
         ctx.cls();
-        self.run_systems(ctx);
         self.render(ctx);
     }
 }
 impl MyState {
 
-    fn init() {
-           
+    pub fn new() -> Self {
+        Self {
+            ecs: World::new(),
+            runstate: RunState::Running,
+        }   
     }
 
     fn run_systems(&mut self, ctx : &mut Rltk) {
-        player_input(self, ctx);
         projectile_system(self);
         light_system(self);
 
@@ -61,7 +75,12 @@ impl MyState {
         map.render(ctx, &cam.offset);
         
         for (pos, render) in (&positions, &renderables).join() {
-            ctx.set(pos.x + cam.offset.x, pos.y + cam.offset.y, render.foreground, render.background, render.glyph);
+            let light = map.get_light(pos.x, pos.y).unwrap_or(0.0);
+            if light < 0.1 { continue };
+            ctx.set(pos.x + cam.offset.x, pos.y + cam.offset.y, 
+                render.foreground, 
+                RGB::lerp(&RGB::named(rltk::BLACK), render.background, light), 
+                render.glyph);
         }
     }
 }

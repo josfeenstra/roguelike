@@ -24,11 +24,13 @@ use geo::Line;
 use util::Dir;
 
 use crate::components::Camera;
+use crate::components::Direction;
 use crate::components::Monster;
 use crate::components::Player;
 use crate::components::Projectile;
 use crate::map::Map;
 use crate::state::MyState;
+use crate::systems::spawn_monsters;
 
 fn print_menu(ctx : &mut Rltk) {
     ctx.print(4, cons::HH + 0, "Welcome, Dungeoneer!");
@@ -51,22 +53,22 @@ fn spawn(ecs: &mut World, x: i32, y: i32, c: char) {
     .build();
 }
 
-fn drawing_things(_ecs: &mut World) {
+fn drawing_things(ecs: &mut World) {
 
-    // for i in 0..256 {
+    for i in 0..256 {
 
-    //     let x = i % 16;
-    //     let y = i / 16;
+        let x = i % 16;
+        let y = i / 16;
 
-    //     ecs
-    //     .create_entity()
-    //     .with(Position::new(0 + x, y))
-    //     .with(Renderable::new(
-    //         i.try_into().unwrap(), 
-    //         RGB::named(rltk::GREEN), 
-    //         RGB::named(rltk::BLACK)))
-    //     .build();
-    // }
+        ecs
+        .create_entity()
+        .with(Position::new(0 + x, y))
+        .with(Renderable::new(
+            i.try_into().unwrap(), 
+            RGB::named(rltk::GREEN), 
+            RGB::named(rltk::BLACK)))
+        .build();
+    }
 
     // let circle = Circle::new(Point::new(10, 10), 7.5);
     // let dir = Dir::Down;
@@ -106,17 +108,16 @@ fn drawing_things(_ecs: &mut World) {
 
 fn main() -> rltk::BError {
 
-    let mut gs = MyState {
-        ecs: World::new()
-    };
+    let mut gs = MyState::new();
 
     gs.ecs.register::<Position>();
+    gs.ecs.register::<Direction>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
     gs.ecs.register::<Monster>();
 
-    drawing_things(&mut gs.ecs);
+    // drawing_things(&mut gs.ecs);
 
     // create the player
     gs.ecs
@@ -124,24 +125,16 @@ fn main() -> rltk::BError {
         .with(Position::new(17, 17))
         .with(Renderable::new(
             rltk::to_cp437('►'), 
-            RGB::named((255,0,0)), 
+            RGB::named(rltk::YELLOW), 
             cons::RGB_BACKGROUND))
-        .with(Player::new())
-        .build();
-
-    gs.ecs
-        .create_entity()
-        .with(Position::new(21, 19))
-        .with(Renderable::new(
-            rltk::to_cp437('K'), 
-            RGB::named((0,255,0)), 
-            cons::RGB_BACKGROUND))
-        .with(Monster{})
+        .with(Player {})
+        .with(Direction { dir: Dir::Down})
         .build();
 
     // render the world
     // let maze = Map::new_random(cons::WIDTH, cons::HEIGHT, 400, 0);
     let maze = Map::new_maze(cons::WIDTH, cons::HEIGHT);
+    spawn_monsters(&mut gs, &maze, 5);
     gs.ecs.insert(maze);
 
     let camera = Camera { offset: Point::new(0,0) };

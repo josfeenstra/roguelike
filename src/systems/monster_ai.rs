@@ -1,19 +1,20 @@
 use specs::prelude::*;
 use rltk::{console};
 
-use crate::components::{Position, Monster};
+use crate::components::{Position, Monster, Direction};
 
 pub struct MonsterAI {}
 
 impl<'a> System<'a> for MonsterAI {
     type SystemData = ( ReadStorage<'a, Position>,
-                        ReadStorage<'a, Monster>);
+                        ReadStorage<'a, Monster>,
+                        ReadStorage<'a, Direction>);
 
     fn run(&mut self, data : Self::SystemData) {
-        let (pos, monster) = data;
+        let (poss, mobs, dirs) = data;
         
-        for (pos,_monster) in (&pos, &monster).join() {
-            // console::log("Monster considers their own existence");
+        for (_pos, _monster, _dir) in (&poss, &mobs, &dirs).join() {
+            console::log("Monster considers its own existence");
         }
     }
 }
