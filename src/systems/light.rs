@@ -29,7 +29,7 @@ pub fn light_system(state: &mut MyState) {
                 // if scale > dropoff {
                 //     f = 1.0 - (scale-dropoff) * (1.0 / dropoff); 
                 // }
-                map.light.set(l.x, l.y, f);
+                map.set_light(l.x, l.y, f);
                 // if !map.is_free(l.x, l.y) { break; };
             }
             // map.light.set(line.to.x, line.to.y, 0.2);

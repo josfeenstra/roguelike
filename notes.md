@@ -1,5 +1,7 @@
 power ideas: 
-- clone & swap
+- clone & tab between clones
+- 
 - dash
 - push
 - pull
+

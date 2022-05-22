@@ -1,8 +1,6 @@
-use std::{borrow::{Borrow, BorrowMut}};
-
-use crate::{cons, util::{Dir, self}, util::Matrix, components::Position, geo::Point};
+use crate::{cons, util::{Dir}, components::Position, geo::Point};
 use rand::prelude::SliceRandom;
-use rltk::{RGB, RandomNumberGenerator, BLACK, RGBA, FontCharType, console};
+use rltk::{RGB, RandomNumberGenerator, console};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Tile {
@@ -20,35 +18,77 @@ pub enum PushResult {
 }
 
 pub struct Map {
-    tiles: Matrix<Tile>,
-    pub light: Matrix<f32>
+    pub width: usize,
+    pub height: usize,
+    pub tiles: Vec<Tile>,
+    pub light: Vec<f32>
 }
 
+// basic data properties
 impl Map {
 
-    pub fn get_tiles(&self) -> &Matrix<Tile> {
-        self.tiles.borrow()
+    pub fn new(width: usize, height: usize, def_tile: Tile, def_light: f32) -> Self {
+        let tiles = vec![def_tile; width * height];
+        let light = vec![def_light; width * height];
+        Self {width, height, tiles, light}
     }
 
-    pub fn get_tiles_mut(&mut self) -> &mut Matrix<Tile> {
-        self.tiles.borrow_mut()
+    pub fn set_tile(&mut self, x: i32, y: i32, tile: Tile) -> Option<usize> {
+        let id = self.to_index(x, y)?;
+        self.tiles[id] = tile;
+        Some(id)
     }
+
+    pub fn get_tile(&self, x: i32, y: i32) -> Option<Tile> {
+        let id = self.to_index(x, y)?;
+        Some(self.tiles[id])
+    }
+
+    pub fn set_light(&mut self, x: i32, y: i32, light: f32) -> Option<usize> {
+        let id = self.to_index(x, y)?;
+        self.light[id] = light;
+        Some(id)
+    }
+
+    pub fn get_light(&self, x: i32, y: i32) -> Option<f32> {
+        let id = self.to_index(x, y)?;
+        Some(self.light[id])
+    }
+
+    pub fn to_index(&self, x: i32, y: i32) -> Option<usize> {
+        if x < 0 || x >= self.width as i32 || y < 0 || y >= self.height as i32 {
+            None
+        } else {
+            Some((y as usize * self.width) + x as usize)
+        }
+    }
+
+    pub fn to_coord(&self, i: usize) -> (i32, i32) {
+        ((i % self.width) as i32, (i / self.width) as i32)
+    }
+
+    pub fn size(&self) -> usize {
+        self.width * self.height
+    }
+}
+
+// advanced map business
+impl Map {
 
     pub fn new_random(width: usize, height: usize, num_walls: u32, num_holes: u32) -> Map {
 
-        let mut tiles = Matrix::new(width, height, Tile::Floor);
-        let visible = Matrix::new(width, height, 0.0);
-    
+        let mut map = Map::new(width, height, Tile::Floor, 0.0);
+
         let w = width as i32;
         let h = height as i32;
     
         for i in 0..w {
-            tiles.set(i, 0, Tile::Wall);
-            tiles.set(i, h-1, Tile::Wall);
+            map.set_tile(i, 0, Tile::Wall);
+            map.set_tile(i, h-1, Tile::Wall);
         } 
         for i in 0..h {
-            tiles.set(0, i, Tile::Wall);
-            tiles.set(w-1, i, Tile::Wall);
+            map.set_tile(0, i, Tile::Wall);
+            map.set_tile(w-1, i, Tile::Wall);
         } 
     
         let mut rng = rltk::RandomNumberGenerator::new();
@@ -56,37 +96,37 @@ impl Map {
         for _i in 0..num_walls as i32 {
             let x = rng.roll_dice(1, w-2);
             let y = rng.roll_dice(1, h-2);
-            tiles.set(x, y, Tile::Wall);
+            map.set_tile(x, y, Tile::Wall);
         }
     
         for _i in 0..num_holes as i32 {
             let x = rng.roll_dice(1, w-2);
             let y = rng.roll_dice(1, h-2);
-            tiles.set(x, y, Tile::Abyss);
+            map.set_tile(x, y, Tile::Abyss);
         }
     
-        Map { tiles, light: visible }
+        map
     }
 
     pub fn new_empty(width: usize, height: usize, filler: Tile, border: bool) -> Map {
-        let mut tiles = Matrix::new(width, height, filler);
-        let visible = Matrix::new(width, height, 0.0);
+
+        let mut map = Map::new(width, height, filler, 0.0);
 
         let w = width as i32;
         let h = height as i32;
         
         if border {
             for i in 0..w {
-                tiles.set(i, 0, Tile::Wall);
-                tiles.set(i, h-1, Tile::Wall);
+                map.set_tile(i, 0,   Tile::Wall);
+                map.set_tile(i, h-1, Tile::Wall);
             } 
             for i in 0..h {
-                tiles.set(0, i, Tile::Wall);
-                tiles.set(w-1, i, Tile::Wall);
+                map.set_tile(0,   i, Tile::Wall);
+                map.set_tile(w-1, i, Tile::Wall);
             } 
         }
 
-        Map { tiles, light: visible }
+        map
     }
 
     /// a elaborate procedure to just create a nice, maze like map.
@@ -114,11 +154,11 @@ impl Map {
         /// select a random direction with unvisited tiles
         fn try_select(rng: &mut RandomNumberGenerator, a: &Position, maze: &Map) -> Option<Dir> {
             let rand = rng.get_rng();
-            let mut valid_dirs = get_valid_dirs(&a, maze.tiles.width as i32, maze.tiles.height as i32);
+            let mut valid_dirs = get_valid_dirs(&a, maze.width as i32, maze.height as i32);
             valid_dirs.shuffle(rand);
             for dir in valid_dirs.iter() {
                 let (dx, dy) = dir.xy();
-                let t = maze.tiles.get(a.x + dx * 2, a.y + dy * 2).unwrap();
+                let t = maze.get_tile(a.x + dx * 2, a.y + dy * 2).unwrap();
                 if t == Tile::Floor {
                     // skip this iteration
                     continue;
@@ -144,7 +184,7 @@ impl Map {
                 x: to_even(rng.range(0, width as i32 - 2)) + 1,
                 y: to_even(rng.range(0, height as i32 - 2)) + 1,
             };
-            maze.tiles.set(pos.x, pos.y, Tile::Floor);
+            maze.set_tile(pos.x, pos.y, Tile::Floor);
             let continuous: bool = rng.range::<i32>(0, 100) < openness;
             positions.push((pos, continuous));
         }
@@ -174,7 +214,7 @@ impl Map {
                 for _ in 0..2 {
                     a.x = (a.x + dx).clamp(0, width as i32);
                     a.y = (a.y + dy).clamp(0, height as i32);
-                    maze.tiles.set(a.x, a.y, Tile::Floor);
+                    maze.set_tile(a.x, a.y, Tile::Floor);
                 }
             }
         }
@@ -190,7 +230,7 @@ impl Map {
     }
 
     pub fn is_free(&self, x: i32, y: i32) -> bool {
-        let t = self.tiles.get(x, y).unwrap_or(Tile::Wall);
+        let t = self.get_tile(x, y).unwrap_or(Tile::Wall);
         t == Tile::Floor
     }
 
@@ -201,19 +241,19 @@ impl Map {
     pub fn apply_push(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
     
         let (dx, dy) = dir.xy();
-        let tile = self.tiles.get(x, y).unwrap_or(Tile::Wall);
+        let tile = self.get_tile(x, y).unwrap_or(Tile::Wall);
         if tile != Tile::Floor { // bump into something?
             if tile == Tile::Wall { // bump into wall?
-                let afterwall = self.tiles.get(x+dx, y+dy).unwrap_or(Tile::Wall);
+                let afterwall = self.get_tile(x+dx, y+dy).unwrap_or(Tile::Wall);
                 if afterwall == Tile::Wall { return PushResult::Blocked }
                 if afterwall == Tile::Floor { // after wall floor? push.
-                    self.tiles.set(x, y, Tile::Floor);
-                    self.tiles.set(x+dx, y+dy, Tile::Wall);
+                    self.set_tile(x, y, Tile::Floor);
+                    self.set_tile(x+dx, y+dy, Tile::Wall);
                     return PushResult::Pushed;
                 }
                 if afterwall == Tile::Abyss { // after wall abyss? push it in
-                    self.tiles.set(x, y, Tile::Floor);
-                    self.tiles.set(x+dx, y+dy, Tile::Floor);
+                    self.set_tile(x, y, Tile::Floor);
+                    self.set_tile(x+dx, y+dy, Tile::Floor);
                     return PushResult::Tumble;
                 }
             } 
@@ -233,7 +273,7 @@ impl Map {
         let mut y = 0;
         let mut x = 0;
 
-        for (tile, light) in self.tiles.data.iter().zip(self.light.data.iter()) {
+        for (tile, light) in self.tiles.iter().zip(self.light.iter()) {
             
             // Render a tile depending upon the tile type
             if *light > 0.0 { 
@@ -243,10 +283,10 @@ impl Map {
                     Tile::Abyss => (cons::RGB_BACKGROUND, black.clone(), rltk::to_cp437(' ')),
                     Tile::Wall => {
                         let char = getwall(
-                            self.tiles.get(x, y-1).unwrap_or(Tile::Floor),
-                            self.tiles.get(x-1, y).unwrap_or(Tile::Floor),
-                            self.tiles.get(x, y+1).unwrap_or(Tile::Floor),
-                            self.tiles.get(x+1, y).unwrap_or(Tile::Floor),
+                            self.get_tile(x, y-1).unwrap_or(Tile::Floor),
+                            self.get_tile(x-1, y).unwrap_or(Tile::Floor),
+                            self.get_tile(x, y+1).unwrap_or(Tile::Floor),
+                            self.get_tile(x+1, y).unwrap_or(Tile::Floor),
                         );
                         (RGB::from_u8(100, 100, 200), cons::RGB_BACKGROUND, rltk::to_cp437(char))
                     }    
@@ -263,7 +303,7 @@ impl Map {
     
             // Move the coordinates
             x += 1;
-            if x > self.tiles.width as i32 - 1 {
+            if x > self.width as i32 - 1 {
                 x = 0;
                 y += 1;
             }
