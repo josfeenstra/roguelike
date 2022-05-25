@@ -33,3 +33,7 @@ pub struct Projectile {
     pub dir: Dir,
     pub lifetime: i32,
 }
+
+// has a solid presence on the board
+#[derive(Component, Debug)]
+pub struct Solid {}

@@ -1,4 +1,4 @@
-use crate::{map::Map, state::MyState, components::{Position, Renderable, Monster, Direction}, cons, util::Dir};
+use crate::{map::Map, state::MyState, components::{Position, Renderable, Monster, Direction, Solid}, cons, util::Dir};
 use rltk::RGB;
 use specs::prelude::*;
 
@@ -26,6 +26,7 @@ pub fn spawn_monsters(state: &mut MyState, map: &Map, count: u32) {
             // .with(Viewshed{ visible_tiles : Vec::new(), range: 8, dirty: true })
             .with(Monster{})
             .with(Direction{ dir: rng.rand() })
+            .with(Solid {})
             .build();
     }
 

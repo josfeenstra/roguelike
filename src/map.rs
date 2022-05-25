@@ -2,11 +2,13 @@ use crate::{cons, util::{Dir}, components::Position, geo::Point};
 use rand::prelude::SliceRandom;
 use rltk::{RGB, RandomNumberGenerator, console};
 
+// TODO implement a two layer system
 #[derive(PartialEq, Clone, Copy)]
 pub enum Tile {
     Wall,
     Floor,
-    Abyss,
+    Empty,
+    Entity,
 }
 
 #[derive(PartialEq)]
@@ -106,7 +108,7 @@ impl Map {
         for _i in 0..num_holes as i32 {
             let x = rng.roll_dice(1, w-2);
             let y = rng.roll_dice(1, h-2);
-            map.set_tile(x, y, Tile::Abyss);
+            map.set_tile(x, y, Tile::Empty);
         }
     
         map
@@ -233,6 +235,8 @@ impl Map {
         maze
     }
 
+
+
     pub fn is_free(&self, x: i32, y: i32) -> bool {
         let t = self.get_tile(x, y).unwrap_or(Tile::Wall);
         t == Tile::Floor
@@ -246,7 +250,19 @@ impl Map {
         self.light.fill(0.0)
     }
 
-    pub fn apply_push(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
+    pub fn clear_all_entities(&mut self) {
+        for tile in self.tiles.iter_mut() {
+            if *tile == Tile::Entity { 
+                *tile = Tile::Floor; 
+            }
+        }
+    }
+
+    pub fn apply_entity(&mut self, x: i32, y: i32) {
+        self.set_tile(x, y, Tile::Entity);
+    }
+
+    pub fn apply_push_effect(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
     
         let (dx, dy) = dir.xy();
         let tile = self.get_tile(x, y).unwrap_or(Tile::Wall);
@@ -259,7 +275,7 @@ impl Map {
                     self.set_tile(x+dx, y+dy, Tile::Wall);
                     return PushResult::Pushed;
                 }
-                if afterwall == Tile::Abyss { // after wall abyss? push it in
+                if afterwall == Tile::Empty { // after wall abyss? push it in
                     self.set_tile(x, y, Tile::Floor);
                     self.set_tile(x+dx, y+dy, Tile::Floor);
                     return PushResult::Tumble;
@@ -272,7 +288,6 @@ impl Map {
         // next tile is free!
         return PushResult::Free;
     }
-
 
     pub fn render(&self, ctx : &mut rltk::Rltk, offset: &Point) {
         
@@ -287,8 +302,7 @@ impl Map {
             if *light > 0.0 { 
 
                 let (fg, bg, glyph) = match tile {
-                    Tile::Floor => (cons::RGB_BACKGROUND, cons::RGB_BACKGROUND, rltk::to_cp437(' ')),
-                    Tile::Abyss => (cons::RGB_BACKGROUND, black.clone(), rltk::to_cp437(' ')),
+                    Tile::Empty => (cons::RGB_BACKGROUND, black.clone(), rltk::to_cp437(' ')),
                     Tile::Wall => {
                         let char = getwall(
                             self.get_tile(x, y-1).unwrap_or(Tile::Floor),
@@ -297,7 +311,8 @@ impl Map {
                             self.get_tile(x+1, y).unwrap_or(Tile::Floor),
                         );
                         (RGB::from_u8(100, 100, 200), cons::RGB_BACKGROUND, rltk::to_cp437(char))
-                    }    
+                    }  
+                    _ => (cons::RGB_BACKGROUND, cons::RGB_BACKGROUND, rltk::to_cp437(' ')),
                 };
 
                 ctx.set(x + offset.x * 1, 

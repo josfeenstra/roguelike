@@ -9,7 +9,7 @@ use crate::components::Renderable;
 use crate::cons;
 use crate::geo::Point;
 use crate::resources::{Camera, PlayerPos};
-use crate::systems::{MonsterAI, player_input};
+use crate::systems::{MonsterAI, player_input, MapIndexing};
 use crate::{systems::{projectile_system, light_system}, map::Map};
 
 #[derive(PartialEq, Copy, Clone)]
@@ -68,7 +68,9 @@ impl MyState {
         light_system(self);
 
         let mut mob = MonsterAI{};
+        let mut mapindex = MapIndexing{};
         mob.run_now(&self.ecs);
+        mapindex.run_now(&self.ecs);
         self.ecs.maintain();
     }
 

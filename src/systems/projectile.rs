@@ -23,12 +23,12 @@ pub fn projectile_system(state: &mut MyState) {
             let (nx, ny) = (pos.x + dx, pos.y + dy);
             
             let next_tile = map.get_tile(nx, ny).unwrap_or(Tile::Wall);
-            let next_tile_free = next_tile == Tile::Abyss || next_tile == Tile::Floor; 
+            let next_tile_free = next_tile == Tile::Empty || next_tile == Tile::Floor; 
             if next_tile_free {
                 pos.x += dx;
                 pos.y += dy;
             } else {
-                let _res = map.apply_push(nx, ny, proj.dir);
+                let _res = map.apply_push_effect(nx, ny, proj.dir);
                 removed.push(e);
             }
         }

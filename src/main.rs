@@ -2,6 +2,7 @@
 
 use components::Position;
 use components::Renderable;
+use components::Solid;
 /**
  * main contains main, but also all non-refactored stuff 
  */
@@ -87,13 +88,6 @@ fn drawing_things(ecs: &mut World) {
     // spawn(ecs, 8,7,'►');
     // spawn(ecs, 6,7,'◄');
     // spawn(ecs, 7,8,'▼');
-    // spawn(ecs, 10,9,'╗');
-    // spawn(ecs, 10,10,'║');
-    // spawn(ecs, 10,11,'╝');
-    // spawn(ecs, 8,9,'╔');
-    // spawn(ecs, 8,10,'║');
-    // spawn(ecs, 8,11,'╚');
-    // spawn(ecs, 9,9,'═');
     // spawn(ecs, 9,11,'═');
     // spawn(ecs, 9,10,'▒');
     // spawn(ecs, 20,3,'░');
@@ -104,8 +98,8 @@ fn drawing_things(ecs: &mut World) {
     // ╨╞╡
 }
 
-/////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////
 
 fn make_player(ecs: &mut World) {
     ecs
@@ -117,6 +111,7 @@ fn make_player(ecs: &mut World) {
             cons::RGB_BACKGROUND))
         .with(Player {})
         .with(Direction { dir: Dir::Down})
+        .with(Solid {})
         .build();
 }
 
@@ -132,6 +127,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Projectile>();
     gs.ecs.register::<Monster>();
+    gs.ecs.register::<Solid>();
 
     // create the player
     make_player(&mut gs.ecs);

@@ -5,3 +5,4 @@ use specs_derive::Component;
 pub struct Player {
 
 }
+
