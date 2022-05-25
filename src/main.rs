@@ -1,5 +1,6 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 
+use components::CombatStats;
 use components::Position;
 use components::Renderable;
 use components::Solid;
@@ -112,6 +113,7 @@ fn make_player(ecs: &mut World) {
         .with(Player {})
         .with(Direction { dir: Dir::Down})
         .with(Solid {})
+        .with(CombatStats { max_hp: 3, hp: 3, defense: 0, power: 1 })
         .build();
 }
 
@@ -128,6 +130,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Projectile>();
     gs.ecs.register::<Monster>();
     gs.ecs.register::<Solid>();
+    gs.ecs.register::<CombatStats>();
 
     // create the player
     make_player(&mut gs.ecs);

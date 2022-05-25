@@ -13,7 +13,7 @@ use crate::systems::{MonsterAI, player_input, MapIndexing};
 use crate::{systems::{projectile_system, light_system}, map::Map};
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum RunState { Paused, Running }
+pub enum RunState { AwaitingInput, PreRun, PlayerTurn, MonsterTurn }
 
 pub struct MyState {
     pub ecs: World,
@@ -24,16 +24,26 @@ impl GameState for MyState {
 
     fn tick(&mut self, ctx : &mut Rltk) {
         
-        // logic 
-        if self.runstate == RunState::Running {
-            self.run_systems(ctx);
-            self.update_resources();
-            self.runstate = RunState::Paused;
-        } else {
-            self.runstate = player_input(self, ctx);
-            self.update_resources();
+        match self.runstate {
+            RunState::PreRun => {
+                self.run_systems(ctx);
+                self.runstate = RunState::AwaitingInput;
+            }
+            RunState::AwaitingInput => {
+                self.runstate = player_input(self, ctx);
+            }
+            RunState::PlayerTurn => {
+                self.run_systems(ctx);
+                self.runstate = RunState::MonsterTurn;
+            }
+            RunState::MonsterTurn => {
+                self.run_systems(ctx);
+                self.runstate = RunState::AwaitingInput;
+            }
         }
-        
+
+        self.update_resources();
+
         // render 
         ctx.cls();
         self.render(ctx);
@@ -44,7 +54,7 @@ impl MyState {
     pub fn new() -> Self {
         Self {
             ecs: World::new(),
-            runstate: RunState::Running,
+            runstate: RunState::PreRun,
         }   
     }
 
@@ -67,9 +77,12 @@ impl MyState {
         projectile_system(self);
         light_system(self);
 
-        let mut mob = MonsterAI{};
+        if self.runstate == RunState::MonsterTurn {
+            let mut mob = MonsterAI{};
+            mob.run_now(&self.ecs);
+        }
+
         let mut mapindex = MapIndexing{};
-        mob.run_now(&self.ecs);
         mapindex.run_now(&self.ecs);
         self.ecs.maintain();
     }

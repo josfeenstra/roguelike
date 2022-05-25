@@ -73,15 +73,15 @@ pub fn player_input(gs: &mut MyState, ctx: &mut Rltk) -> RunState {
     
     // Player movement
     match ctx.key {
-        None => { return RunState::Paused } // Nothing happened
+        None => { return RunState::AwaitingInput } // Nothing happened, try again
         Some(key) => match key {
             VirtualKeyCode::Left  => try_move_player(Dir::Left, &mut gs.ecs),
             VirtualKeyCode::Right => try_move_player(Dir::Right, &mut gs.ecs),
             VirtualKeyCode::Up    => try_move_player(Dir::Up, &mut gs.ecs),
             VirtualKeyCode::Down  => try_move_player(Dir::Down, &mut gs.ecs),
             VirtualKeyCode::Space  => try_player_shoot(&mut gs.ecs),
-            _ => { return RunState::Paused }
+            _ => { return RunState::AwaitingInput }
         },
     }
-    RunState::Running
+    RunState::PlayerTurn // return this after a succesfull move
 }

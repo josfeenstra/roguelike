@@ -26,7 +26,7 @@ pub struct Map {
     pub light: Vec<f32>
 }
 
-// basic data properties
+// basic data methods
 impl Map {
 
     pub fn new(width: usize, height: usize, def_tile: Tile, def_light: f32) -> Self {
@@ -78,7 +78,7 @@ impl Map {
     }
 }
 
-// advanced map business
+// more high level map methods
 impl Map {
 
     pub fn new_random(width: usize, height: usize, num_walls: u32, num_holes: u32) -> Map {
@@ -235,7 +235,7 @@ impl Map {
         maze
     }
 
-
+    /////////////////////////////////////////////////////////////////
 
     pub fn is_free(&self, x: i32, y: i32) -> bool {
         let t = self.get_tile(x, y).unwrap_or(Tile::Wall);
@@ -250,6 +250,8 @@ impl Map {
         self.light.fill(0.0)
     }
 
+    /////////////////////////////////////////////////////////////////
+
     pub fn clear_all_entities(&mut self) {
         for tile in self.tiles.iter_mut() {
             if *tile == Tile::Entity { 
@@ -261,6 +263,8 @@ impl Map {
     pub fn apply_entity(&mut self, x: i32, y: i32) {
         self.set_tile(x, y, Tile::Entity);
     }
+
+    /////////////////////////////////////////////////////////////////
 
     pub fn apply_push_effect(&mut self, x: i32, y: i32, dir: Dir) -> PushResult {
     
@@ -288,6 +292,8 @@ impl Map {
         // next tile is free!
         return PushResult::Free;
     }
+
+    /////////////////////////////////////////////////////////////////
 
     pub fn render(&self, ctx : &mut rltk::Rltk, offset: &Point) {
         

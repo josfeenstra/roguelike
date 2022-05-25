@@ -1,4 +1,4 @@
-use crate::{map::Map, state::MyState, components::{Position, Renderable, Monster, Direction, Solid}, cons, util::Dir};
+use crate::{map::Map, state::MyState, components::{Position, Renderable, Monster, Direction, Solid, CombatStats}, cons, util::Dir};
 use rltk::RGB;
 use specs::prelude::*;
 
@@ -27,6 +27,7 @@ pub fn spawn_monsters(state: &mut MyState, map: &Map, count: u32) {
             .with(Monster{})
             .with(Direction{ dir: rng.rand() })
             .with(Solid {})
+            .with(CombatStats { max_hp: 3, hp: 3, defense: 0, power: 1 })
             .build();
     }
 
