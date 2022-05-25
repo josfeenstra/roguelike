@@ -11,3 +11,8 @@ pub struct Camera {
 pub struct PlayerPos {
     pub pos: Point,
 }
+
+pub struct Lives {
+    pub count: i32,
+    pub max: i32,
+}

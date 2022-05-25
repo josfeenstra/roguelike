@@ -27,7 +27,6 @@ pub fn spawn_monsters(state: &mut MyState, map: &Map, count: u32) {
             .with(Monster{})
             .with(Direction{ dir: rng.rand() })
             .with(Solid {})
-            .with(CombatStats { max_hp: 3, hp: 3, defense: 0, power: 1 })
             .build();
     }
 

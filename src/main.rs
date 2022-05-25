@@ -32,6 +32,7 @@ use crate::components::Player;
 use crate::components::Projectile;
 use crate::map::Map;
 use crate::resources::Camera;
+use crate::resources::Lives;
 use crate::resources::PlayerPos;
 use crate::state::MyState;
 use crate::systems::spawn_monsters;
@@ -143,6 +144,7 @@ fn main() -> rltk::BError {
     // create other resources
     gs.ecs.insert(Camera { offset: Point::new(0,0) });
     gs.ecs.insert(PlayerPos { pos: Point::new(0,0) });
+    gs.ecs.insert(Lives { count: 3, max: 3 });
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
 
     // spawn the window

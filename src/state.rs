@@ -8,7 +8,7 @@ use crate::components::Position;
 use crate::components::Renderable;
 use crate::cons;
 use crate::geo::Point;
-use crate::resources::{Camera, PlayerPos};
+use crate::resources::{Camera, PlayerPos, Lives};
 use crate::systems::{MonsterAI, player_input, MapIndexing};
 use crate::{systems::{projectile_system, light_system}, map::Map};
 
@@ -59,6 +59,7 @@ impl MyState {
     }
 
     fn update_resources(&mut self) {
+
         let players = self.ecs.read_storage::<Player>();
         let positions = self.ecs.read_storage::<Position>();
 
@@ -74,6 +75,7 @@ impl MyState {
     }
 
     fn run_systems(&mut self, ctx : &mut Rltk) {
+
         projectile_system(self);
         light_system(self);
 
@@ -92,7 +94,7 @@ impl MyState {
         let players = self.ecs.read_storage::<Player>();
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
-
+        
         let map = self.ecs.fetch::<Map>();
         let cam = self.ecs.fetch::<Camera>();
         
@@ -106,5 +108,28 @@ impl MyState {
                 RGB::lerp(&RGB::named(rltk::BLACK), render.background, light), 
                 render.glyph);
         }
+
+        // UI
+        let lives = self.ecs.fetch::<Lives>();
+        for i in 0..lives.max { 
+            ctx.set(
+                cons::WIDTH as i32 - 2,
+                cons::HEIGHT as i32 - 2 - i,
+                RGB::named(rltk::GREY),
+                RGB::named(rltk::BLACK),
+                rltk::to_cp437('♥')
+            )
+        }
+        for i in 0..lives.count { 
+            ctx.set(
+                cons::WIDTH as i32 - 2,
+                cons::HEIGHT as i32 - 2 - i,
+                RGB::named(rltk::RED),
+                RGB::named(rltk::BLACK),
+                rltk::to_cp437('♥')
+            )
+         }
+
+
     }
 }
