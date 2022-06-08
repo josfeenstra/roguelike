@@ -3,6 +3,8 @@
 
 # Roguelike
 
+**[Play it](https://josfeenstra.nl/project/roguelike/)**
+
 Something in between a roguelike and a sobokan game, using classic glyph-based rendering. Just a toy project to work on in my spare time :).
 
 Written in Rust, published in WebAssembly.
